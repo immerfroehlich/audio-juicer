@@ -1,0 +1,231 @@
+
+
+Simple Tool that rips wav files from CD and converts them to MP3 or whatever you like
+by using command line tools.
+
+Important features (sorted by priority from the most important on the top):
+- Free Software GPLv2 or GPLv3
+- Fixed lame presets (with joint stereo)
+- Musicbrainz / CDDB retrieval of Artist name, Album name, Song name
+- GUI (JavaFX or Swing)
+- Artwork retrieval
+- User presets (just enter the command line)
+- If not available easy user upload of artist name etc to Musicbrainz
+- For Archiving purposes Hash generation for each file and comparison (sha or md5?)
+- For Archiving: Parallel generation of mp3 and flac
+- (Archive database?)
+
+
+Uses: cdparanoia and lame (ffmpeg for flac?) command line tools
+
+
+
+Information retrieval sites:
+------------------------
+https://musicbrainz.org/
+https://coverartarchive.org/
+
+Used commands:
+--------------------
+Lame:
+lame --preset standard sample.wav sample.mp3
+(Joint Stereo is default, -q 0 for best quality algorithms but more computing power needed)
+
+
+
+Infos:
+-----------------------
+
+JDEB - Create Debian debs of Java builds using ant:
+https://github.com/tcurdt/jdeb
+
+How to use Ant tasks within Gradle:
+https://docs.gradle.org/current/userguide/ant.html
+
+How to rip cds from command line:
+https://www.cyberciti.biz/faq/linux-ripping-and-encoding-audio-files/
+
+How to find all cd drives:
+https://www.cyberciti.biz/faq/linux-find-out-the-name-of-dvd-cd-rom-writer-blu-ray-device/
+
+Lame command line documentation: (search for preset)
+https://svn.code.sf.net/p/lame/svn/trunk/lame/USAGE
+
+Cdparanoia command line documentation:
+https://xiph.org/paranoia/manual.html
+
+
+https://en.wikipedia.org/wiki/List_of_online_music_databases
+
+Java Native Interface Tutorial:
+https://developer.ibm.com/tutorials/j-jni/
+
+
+Possible libraries:
+https://github.com/schnatterer/musicbrainzws2-java
+
+Alternative libdiscid Java Wrapper: https://github.com/dietmar-steiner/JMBDiscId/blob/master/src/org/musicbrainz/discid/JMBDiscId.java
+
+https://github.com/lastfm/coverartarchive-api
+
+
+https://github.com/syntelos/cddb (this looks dirty, like CPP-Code, no unmarshalling of XML, no clearly defined API, no licence)
+
+
+Debian Java packaging:
+-----------------------------------
+Debian Git Repository:
+https://salsa.debian.org/public
+
+Debian (package) Policy:
+https://www.debian.org/doc/debian-policy/
+
+Debian Java package Policy:
+https://www.debian.org/doc/packaging-manuals/java-policy/
+
+Gradle Debian Helper:
+https://wiki.debian.org/Java/Packaging/Gradle
+
+
+
+
+Handling native libraries (here libdiscid)
+---------------------------------------------
+https://stackoverflow.com/questions/29437888/using-gradle-with-native-dependencies
+
+https://discuss.gradle.org/t/setting-eclipse-native-library-location/11075
+
+Unter Linux: Aufruf System.loadNative(name)
+Die Datei muss lib[name].so heißen.
+Aufruf mit java -Djava.library.path=relativ oder absolut
+
+
+libdiscid-java Probleme
+-------------------------
+Fehler beim Aufruf:
+java -Djava.library.path=native/linux/amd64:/home/andreas/bin/workspaces/java_projects/libdiscid/_build -cp build:lib/benow-launch.jar test.org.musicbrainz.discid.Query
+java: symbol lookup error: /home/andreas/bin/workspaces/java_projects/libdiscid-java/native/linux/amd64/libdiscid-java.so: undefined symbol: discid_new
+
+Nicht korrekt verlinkt?
+Siehe Kommentar von Joni:
+https://stackoverflow.com/questions/17322885/jni-using-symbol-lookup-error
+
+Aufruf von
+ldd libdiscid-java.so
+liefert:
+statically linked
+
+Sollten hier nicht eigentlich die konkret verlinkten Bibliotheken stehen?
+
+Hinweis vom Ant Build:
+cd ..; java -cp build:libdiscid-java.jar -Djava.library.path=native/linux/amd64 test.ca.benow.jni.LinkerTest
+     [exec] Library linking validated.  Ensure to specify the native directory in the java.library.path, ie:
+     [exec]     java -Djava.library.path=native/linux/amd64 org.some.Class
+     [exec] It works!
+     
+Antwort: Die Reihenfolge der Parameter ist entscheidend.
+-L nach -o
+https://stackoverflow.com/a/24257685
+
+     
+Java Native Interface and C/C++ Tutorials:
+------------------------------------------
+https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaNativeInterface.html#zz-4.
+
+http://www.willemer.de/informatik/cpp/pointer.htm
+https://stackoverflow.com/questions/13553752/convert-char-pointer-to-unsigned-char-array
+
+Libdiscid example: https://github.com/metabrainz/libdiscid/blob/master/examples/disc_metadata.c
+
+https://docs.gradle.org/current/userguide/building_cpp_projects.html#cpp_pluginhttps://docs.gradle.org/current/userguide/building_cpp_projects.html#cpp_plugin
+https://docs.gradle.org/current/userguide/cpp_library_plugin.html
+
+Vielleicht sollte ich libdiscid einfach kopieren und das Ant-Build-Skript verwenden.
+
+Beispiel für javah-Benutzung:
+https://stackoverflow.com/a/39247196
+
+javah -d ~/bin/workspaces/java_projects/libdiscid-java-wrapper/native -classpath ~/bin/workspaces/java_projects/libdiscid-java-wrapper/build de.immerfroehlich.discid.DiscIdCalculator
+
+https://stackoverflow.com/questions/579734/assigning-strings-to-arrays-of-characters
+https://stackoverflow.com/questions/6238785/newstringutf-and-freeing-memory
+
+https://www.cs-fundamentals.com/c-programming/static-and-dynamic-linking-in-c.php
+
+Gradle
+------------------------------------------
+https://stackoverflow.com/questions/35244961/how-do-i-add-default-jvm-arguments-with-gradle
+https://stackoverflow.com/questions/38663328/use-ant-project-as-gradle-subproject
+https://developer.android.com/studio/projects/gradle-external-native-builds
+     
+
+Github Projekte direkt im Gradle Projekt als Dependency einbinden:
+-----------------------------------------------------------------
+https://jitpack.io/
+
+How to deal with Runtime.exec
+-------------------------------------------
+https://www.javaworld.com/article/2071275/when-runtime-exec---won-t.html
+
+Linux Bash Operators (won't work in exec because it isn't a Bash)
+--------------------------------------------------------------------
+https://www.putorius.net/linux-io-file-descriptors-and-redirection.html
+
+Using Musicbrainz:
+---------------------------------------------------------------
+Web Service v2:
+https://musicbrainz.org/doc/Development/XML_Web_Service/Version_2#Relationships
+
+Json Web Service:
+https://musicbrainz.org/doc/Development/JSON_Web_Service
+
+Entity explanation:
+https://wiki.musicbrainz.org/MusicBrainz_Database/Schema
+
+High-Res Entity Relationship Diagram:
+https://wiki.musicbrainz.org/-/images/5/52/ngs.png
+
+Query Disc by discid:
+https://musicbrainz.org/ws/2/discid/<discid>/?fmt=json
+https://musicbrainz.org/ws/2/discid/OLLSzCTuujhgIKijhSwdw7ljJ2I-/?fmt=json
+
+https://musicbrainz.org/ws/2/discid/OLLSzCTuujhgIKijhSwdw7ljJ2I-/?fmt=json&inc=recordings+artist-credits
+
+Query Release (???) by id:
+https://musicbrainz.org/ws/2/release/<releaseid>/?&fmt=json
+
+Search for Release:
+https://musicbrainz.org/ws/2/release?query=Die+Bibel+Geschichten+Testament&fmt=json
+
+Cover-Art:
+----------------------
+
+Cover-Art-Archive:
+https://coverartarchive.org/release/<mbid>
+https://coverartarchive.org/release/3f6bf902-b5af-4d4a-836a-681db6099896
+
+http://id3.org/id3v2.3.0
+
+https://unix.stackexchange.com/questions/84915/add-album-art-cover-to-mp3-ogg-file-from-command-line-in-batch-mode
+
+lame --ti /path/to/file.jpg audio.mp3
+
+
+REST Services with JSON in Java (with Jersey [and Jackson?]):
+--------------------------------------------------------------
+https://vaadin.com/tutorials/consuming-rest-services-from-java-applications
+https://eclipse-ee4j.github.io/jersey.github.io/documentation/latest/modules-and-dependencies.html
+https://stackoverflow.com/questions/44088493/jersey-stopped-working-with-injectionmanagerfactory-not-found
+https://stackoverflow.com/questions/23442440/messagebodyreader-not-found-for-media-type-application-json
+https://stackoverflow.com/questions/5455014/ignoring-new-fields-on-json-objects-using-jackson
+
+http://www.jsonschema2pojo.org/
+
+Gradle and Kotlin Infos:
+----------------------------
+https://docs.gradle.org/current/userguide/userguide_single.html#build_lifecycle
+https://docs.gradle.org/5.6.2/dsl/org.gradle.api.Project.html
+
+https://kotlinlang.org/docs/tutorials/getting-started-eclipse.html
+https://play.kotlinlang.org/byExample/01_introduction/01_Hello%20world
+https://kotlinlang.org/docs/reference/native-overview.html
