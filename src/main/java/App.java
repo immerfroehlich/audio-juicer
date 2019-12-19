@@ -15,6 +15,7 @@ import de.immerfroehlich.command.CommandExecutor;
 import de.immerfroehlich.command.Result;
 import de.immerfroehlich.discid.DiscIdCalculator;
 import de.immerfroehlich.javajuicer.model.Mp3Track;
+import de.immerfroehlich.javajuicer.utils.FATCharRemover;
 import de.immerfroehlich.musicbrainz.MusicbrainzWs2Service;
 import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Medium;
@@ -46,20 +47,28 @@ public class App {
     	
     	Release release = promptForRelease(releases, "Select release");
     	release = reloadRelease(release);
-    	Release firstRelease = promptForRelease(releases, "Select first release"); //TODO Das erste Erscheinungsjahr lässt sich so nicht zuverlässig ermitteln! Wird bei Musicbrainz aber je Album angegeben.
+    	//TODO Das erste Erscheinungsjahr lässt sich so nicht zuverlässig ermitteln! Wird bei Musicbrainz aber je Album angegeben.
+    	//Ggf. das erste Erscheinungsjahr je Track ermitteln, z.B. bei Compilations
+    	Release firstRelease = promptForRelease(releases, "Select first release");
     	Medium medium = promptForMedium(release);
     	
     	List<Mp3Track> mp3Tracks = mapToMp3Tracks(release, firstRelease, medium);
     	
     	
     	String rootPath = "/home/andreas/Musik/Archiv";
-    	String mp3Path = rootPath + "/" + "mp3" + "/" + release.artistCredit.get(0).name + "/" + release.title;
-    	String wavPath = rootPath + "/" + "wav" + "/" + release.artistCredit.get(0).name + "/" + release.title;
+    	String cdArtist = release.artistCredit.get(0).name;
+    	String cdTitle = release.title;
+    	cdArtist = FATCharRemover.removeUnallowedChars(cdArtist);
+    	cdTitle = FATCharRemover.removeUnallowedChars(cdTitle);
+    	
+    	String mp3Path = rootPath + "/" + "mp3" + "/" + cdArtist + "/" + cdTitle;
+    	String wavPath = rootPath + "/" + "wav" + "/" + cdArtist + "/" + cdTitle;
     	if(release.multiCDRelease) {
     		String cdPathAddon = "/CD" + medium.position;
     		mp3Path += cdPathAddon;
     		wavPath += cdPathAddon;
     	}
+    	
     	
     	System.out.println(mp3Path);
     	System.out.println(wavPath);
@@ -70,6 +79,17 @@ public class App {
     	
     	ripWavFromStdCdromTo(wavPath);
     	
+    	//TODO: Load file list. If differs from mp3tracks ask for pregaptrack if not already from musicbrainz
+    	List<File> files = listFilesOfFolder(wavPath);
+    	boolean moreFilesThenTracks = files.size() > mp3Tracks.size();
+    	if(moreFilesThenTracks) {
+    		boolean oneMoreFileThenTracks = files.size() == mp3Tracks.size() + 1;
+    		if(oneMoreFileThenTracks) {
+    			//TODO: Prompt for pregaptrack.
+    			//Else sysout and exit
+    		}
+    		//else sysout and exit
+    	}
     	
     	createMp3OfEachWav(wavPath, mp3Path, mp3Tracks);
     }
@@ -174,8 +194,7 @@ public class App {
 	}
 
 	public static void createMp3OfEachWav(String wavPath, String targetPath, List<Mp3Track> tracks) {
-    	File folder = new File(wavPath);
-    	List<File> files = Arrays.asList(folder.listFiles());
+    	List<File> files = listFilesOfFolder(wavPath);
     	Collections.sort(files);
     	
     	for (int i = 0; i < files.size(); i++) {
@@ -189,6 +208,7 @@ public class App {
     		Mp3Track track = tracks.get(i);
     		String trackNumber = createTrackNumber(i+1);
     		String outputFile = trackNumber + " " + track.title + ".mp3";
+    		outputFile = FATCharRemover.removeUnallowedChars(outputFile);
     		
     		String fullQualifiedInputFile = wavPath + "/" + inputFile;
     		String fullQualifiedOuputFile = targetPath + "/" + outputFile;
@@ -208,6 +228,12 @@ public class App {
     		System.out.println("Track " + trackNumber + " finished.");
     	}
     }
+
+	public static List<File> listFilesOfFolder(String wavPath) {
+		File folder = new File(wavPath);
+    	List<File> files = Arrays.asList(folder.listFiles());
+		return files;
+	}
     
     public static Result createMp3Of(String fullQualifiedInputFile, String fullQualifiedOuputFile, Mp3Track track, String trackNumber) {
     	Command command = new Command();

@@ -229,3 +229,8 @@ https://docs.gradle.org/5.6.2/dsl/org.gradle.api.Project.html
 https://kotlinlang.org/docs/tutorials/getting-started-eclipse.html
 https://play.kotlinlang.org/byExample/01_introduction/01_Hello%20world
 https://kotlinlang.org/docs/reference/native-overview.html
+
+Allowed characters in specific file system file names:
+-------------------------------------------------------
+https://stackoverflow.com/questions/19503697/unicode-filenames-on-fat-32
+https://serverfault.com/questions/242110/which-common-charecters-are-illegal-in-unix-and-windows-filesystems
