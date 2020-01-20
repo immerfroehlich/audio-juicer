@@ -9,12 +9,10 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonNaming(KebabCaseStrategy.class)
-public class Medium {
+public class Pregap {
 	
-	public String format = "";
-	public String position = "";
-	public String trackCount = "";
-	public List<Track> tracks = new ArrayList<>();
-	public Pregap pregap = new Pregap();
+	public int position;
+	public String title;
+	public List<ArtistCredit> artistCredit = new ArrayList<>();
 
 }

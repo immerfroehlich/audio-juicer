@@ -4,20 +4,32 @@ Simple Tool that rips wav files from CD and converts them to MP3 or whatever you
 by using command line tools.
 
 Important features (sorted by priority from the most important on the top):
-- Free Software GPLv2 or GPLv3
-- Fixed lame presets (with joint stereo)
-- Musicbrainz / CDDB retrieval of Artist name, Album name, Song name
-- GUI (JavaFX or Swing)
-- Artwork retrieval
-- User presets (just enter the command line)
-- If not available easy user upload of artist name etc to Musicbrainz
-- For Archiving purposes Hash generation for each file and comparison (sha or md5?)
-- For Archiving: Parallel generation of mp3 and flac
-- (Archive database?)
+- [ ] Free Software GPLv2 or GPLv3
+- [ ] Fixed lame presets (with joint stereo) [Really needed? Just preset standard implemented. For classical music FLAC would probably better.
+- [x] Musicbrainz / CDDB retrieval of Artist name, Album name, Song name
+- [ ] Artwork retrieval
+- [ ] For Archiving purposes Hash generation for each file and comparison (sha2)
+- [ ] For Archiving: Parallel generation of mp3 and flac
+- [ ] GUI (JavaFX or Swing)
+- [ ] User presets (just enter the command line)
+- [ ] If not available easy user upload of artist name etc to Musicbrainz
+- [ ] (Archive database?)
 
 
 Uses: cdparanoia and lame (ffmpeg for flac?) command line tools
 
+TODO / Backlog
+------------------------
+- [x] Pregap track (inaudible) - don't convert it to mp3. Remove the wav (Example: Genesis - Selling England..., Vangelis - Blade Runner)
+- [x] Add support for hidden audible pregap tracks (Example: Die Ärzte - 13)
+- [ ] The first release year must be searched by a special query and not via discid. Often the first release has been a vinyl/Schellack record
+- Blade Runner throws IndexOutOfBoundsException
+java.lang.IndexOutOfBoundsException: Index: 12, Size: 12
+	at java.util.ArrayList.rangeCheck(ArrayList.java:653)
+	at java.util.ArrayList.get(ArrayList.java:429)
+	at App.createMp3OfEachWav(App.java:208)
+	at App.main(App.java:94)
+Seems to be a pregap track
 
 
 Information retrieval sites:

@@ -19,6 +19,7 @@ import de.immerfroehlich.javajuicer.utils.FATCharRemover;
 import de.immerfroehlich.musicbrainz.MusicbrainzWs2Service;
 import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Medium;
+import de.immerfroehlich.musicbrainz.model.Pregap;
 import de.immerfroehlich.musicbrainz.model.Release;
 import de.immerfroehlich.musicbrainz.model.Track;
 
@@ -79,20 +80,53 @@ public class App {
     	
     	ripWavFromStdCdromTo(wavPath);
     	
-    	//TODO: Load file list. If differs from mp3tracks ask for pregaptrack if not already from musicbrainz
-    	List<File> files = listFilesOfFolder(wavPath);
+    	findPregapTrack(mp3Tracks, wavPath);
+    	
+    	createMp3OfEachWav(wavPath, mp3Path, mp3Tracks);
+    }
+
+	private static void findPregapTrack(List<Mp3Track> mp3Tracks, String wavPath) {
+		//TODO: Load pregaptrack info from musicbrainz
+    	
+		List<File> files = listFilesOfFolder(wavPath);
+		Collections.sort(files);
+		
     	boolean moreFilesThenTracks = files.size() > mp3Tracks.size();
     	if(moreFilesThenTracks) {
     		boolean oneMoreFileThenTracks = files.size() == mp3Tracks.size() + 1;
     		if(oneMoreFileThenTracks) {
-    			//TODO: Prompt for pregaptrack.
-    			//Else sysout and exit
+    			System.out.println("A track was found that is not listed on musicbrainz.org.\r\n”"
+    					+ "Most propably this is a inaudible pregap track that was used in the past to calibrate\r\n"
+    					+ "old CD Players.\r\n"
+    					+ "But it could be a hidden track that is audible but not listed on the cover.\r\n"
+    					+ "Please listen to the WAV files and decide.\r\n\r\n");
+    			boolean yes = askYesNo("Is it a hidden audible track?");
+    			if(yes) {
+    				System.out.println("Please add the track to the selected release on musicbrain.org as track 00 and start again.");
+    			}
+    			else {
+    				File file = files.get(0);
+    				String filename = file.getName();
+    				System.out.println("If " + filename + " is the pregap track it will be deleted and the application tries to continue.");
+    				yes = askYesNo("Is " + filename + " the inaudible pregap track?");
+    				if(yes) {
+    					file.delete();
+    				}
+    				else {
+    					System.out.println("This is currently not supported by this application.");
+    					System.exit(0);
+    				}
+    			}
     		}
-    		//else sysout and exit
+    		else {
+    			System.out.println("There are more tracks on the CD than are listed on musicbrainz.org.\r\n"
+    					+ "Probably the information on musicbrainz.org is not correct. If this is the case, please\r\n"
+    					+ "correct it."
+    					+ "Otherwise the CD contains multiple hidden tracks. Which is currently not supported by this application.");
+    			System.exit(0);
+    		}
     	}
-    	
-    	createMp3OfEachWav(wavPath, mp3Path, mp3Tracks);
-    }
+	}
     
     private static Release reloadRelease(Release release) {
     	MusicbrainzWs2Service service = new MusicbrainzWs2Service();
@@ -143,6 +177,22 @@ public class App {
 
 	private static List<Mp3Track> mapToMp3Tracks(Release release, Release firstRelease, Medium medium) {
     	List<Mp3Track> tracks = new ArrayList<>();
+    	
+    	Pregap pregap = medium.pregap;
+    	boolean pregapAvailable = pregap != null;
+    	if(pregapAvailable) {
+    		if(pregap.position != 0) {
+    			System.out.println("A pregap audible track other then position 00 is currently not supported by this application.");
+    		}
+    		System.out.println("=== This CD has a hidden \"first\" track that is most probably not listed on the cover.===");
+    		Mp3Track mp3Track = new Mp3Track();
+			mp3Track.artist = pregap.artistCredit.get(0).name;
+			mp3Track.releaseYear = release.date;
+			mp3Track.firstReleaseYear = firstRelease.date;
+			mp3Track.title = pregap.title;
+			tracks.add(mp3Track);
+    	}
+    	
     	for(Track track : medium.tracks) {
 			Mp3Track mp3Track = new Mp3Track();
 			mp3Track.artist = release.artistCredit.get(0).name;
@@ -362,5 +412,15 @@ public class App {
 			next = false;
 		}
 		return next;
+	}
+	
+	public static boolean askYesNo(String question) {
+		Prompt prompt = new Prompt(System.in, System.out);
+    	StringInputScanner scanner = new StringInputScanner();
+    	
+    	System.out.print(question);
+    	String yesNo = prompt.getUserInput(scanner);
+    	boolean correct = yesNo.equals("y") ? true : false;
+    	return correct;
 	}
 }
