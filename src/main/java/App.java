@@ -186,6 +186,12 @@ public class App {
     		}
     		System.out.println("=== This CD has a hidden \"first\" track that is most probably not listed on the cover.===");
     		Mp3Track mp3Track = new Mp3Track();
+    		
+    		boolean noArtistCredit = pregap.artistCredit.size() == 0;
+    		if(noArtistCredit) {
+    			System.out.println("The pregap does not have an artist-credit. Please correct that for the selected record in musicbrainz.org and try again.");
+    			System.exit(0);
+    		}
 			mp3Track.artist = pregap.artistCredit.get(0).name;
 			mp3Track.releaseYear = release.date;
 			mp3Track.firstReleaseYear = firstRelease.date;
@@ -331,8 +337,21 @@ public class App {
 		command.setBasePath(wavPath);
 		
 		CommandExecutor executor = new CommandExecutor();
-		executor.execute(command);
-		//TODO überprüfen, ob result Fehler enthält.
+		Result result = executor.execute(command);
+		
+		if(result.hasErrors()) {
+			List<String> errorRows = result.getStdErr();
+			//TODO Richtige Fehlerbehandlung.
+			for(String error : errorRows) {
+				System.out.println(error);
+			}
+		}
+		else {
+			List<String> output = result.asStringList();
+			for(String line : output) {
+				System.out.println(line);
+			}
+		}
 	}
 
 	private static void createPathWithParents(String path) {

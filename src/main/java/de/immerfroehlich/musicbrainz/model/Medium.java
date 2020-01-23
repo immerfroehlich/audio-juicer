@@ -15,6 +15,6 @@ public class Medium {
 	public String position = "";
 	public String trackCount = "";
 	public List<Track> tracks = new ArrayList<>();
-	public Pregap pregap = new Pregap();
+	public Pregap pregap;
 
 }
