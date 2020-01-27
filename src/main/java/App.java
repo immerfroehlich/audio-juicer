@@ -50,10 +50,10 @@ public class App {
     	release = reloadRelease(release);
     	//TODO Das erste Erscheinungsjahr lässt sich so nicht zuverlässig ermitteln! Wird bei Musicbrainz aber je Album angegeben.
     	//Ggf. das erste Erscheinungsjahr je Track ermitteln, z.B. bei Compilations
-    	Release firstRelease = promptForRelease(releases, "Select first release");
+    	String releaseDate = promptForReleaseYear(releases, "Select first release date");
     	Medium medium = promptForMedium(release);
     	
-    	List<Mp3Track> mp3Tracks = mapToMp3Tracks(release, firstRelease, medium);
+    	List<Mp3Track> mp3Tracks = mapToMp3Tracks(release, releaseDate, medium);
     	
     	
     	String rootPath = "/home/andreas/Musik/Archiv";
@@ -175,7 +175,7 @@ public class App {
 		return release.media.get(number);
 	}
 
-	private static List<Mp3Track> mapToMp3Tracks(Release release, Release firstRelease, Medium medium) {
+	private static List<Mp3Track> mapToMp3Tracks(Release release, String releaseDate, Medium medium) {
     	List<Mp3Track> tracks = new ArrayList<>();
     	
     	Pregap pregap = medium.pregap;
@@ -192,9 +192,10 @@ public class App {
     			System.out.println("The pregap does not have an artist-credit. Please correct that for the selected record in musicbrainz.org and try again.");
     			System.exit(0);
     		}
+    		mp3Track.isPregap = true;
 			mp3Track.artist = pregap.artistCredit.get(0).name;
 			mp3Track.releaseYear = release.date;
-			mp3Track.firstReleaseYear = firstRelease.date;
+			mp3Track.firstReleaseYear = releaseDate;
 			mp3Track.title = pregap.title;
 			tracks.add(mp3Track);
     	}
@@ -203,7 +204,7 @@ public class App {
 			Mp3Track mp3Track = new Mp3Track();
 			mp3Track.artist = release.artistCredit.get(0).name;
 			mp3Track.releaseYear = release.date;
-			mp3Track.firstReleaseYear = firstRelease.date;
+			mp3Track.firstReleaseYear = releaseDate;
 			mp3Track.title = track.title;
 			tracks.add(mp3Track);
 		}
@@ -230,6 +231,38 @@ public class App {
     	Integer number = prompt.getUserInput(scanner);
 		
     	return releases.get(number);
+	}
+	
+	private static String promptForReleaseYear(List<Release> releases, String text) {
+		Prompt prompt = new Prompt(System.in, System.out);
+		IntegerInputScanner scanner = new IntegerInputScanner();
+		
+		Release release;
+		int i = 0;
+		while(i < releases.size()) {
+			release = releases.get(i);
+			System.out.println("[" + i + "] " + release.date);
+			i++;
+		}
+		
+		System.out.println("[" + (i+1) + "] Or enter release year/date manually:");
+		System.out.println("---------------");
+		
+		System.out.println(text);
+		Integer number = prompt.getUserInput(scanner);
+		String releaseDate;		
+		
+		boolean manuallySelected = number > (releases.size() -1);
+		if(manuallySelected) {
+			System.out.println("Enter release year/date");
+			StringInputScanner stringScanner = new StringInputScanner();
+			releaseDate = prompt.getUserInput(stringScanner);
+		}
+		else {
+			releaseDate = releases.get(number).date;
+		}
+		
+		return releaseDate;
 	}
 
 	private static String calculateDiscIdByDevicePath(String drivePath) {
@@ -366,8 +399,10 @@ public class App {
 
 	private static void promptCorrect(List<Mp3Track> mp3Tracks) {
 		
+		int i = 0;
 		for(Mp3Track track : mp3Tracks) {
-			System.out.println(track);
+			if(!track.isPregap) i++;
+			System.out.println(i + " " + track);
 		}
 		
 		Prompt prompt = new Prompt(System.in, System.out);
