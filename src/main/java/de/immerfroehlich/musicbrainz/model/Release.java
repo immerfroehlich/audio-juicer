@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 @JsonNaming(KebabCaseStrategy.class)
 public class Release {
 	
+	public String id = "";
+	
 	public String title = "";
 	public String date = "";
 	public String barcode = "";
@@ -18,9 +20,10 @@ public class Release {
 	public List<ArtistCredit> artistCredit = new ArrayList<>();
 	
 	public List<Medium> media = new ArrayList<>();
-	public String id = "";
 	
 	@JsonIgnoreProperties
 	public boolean multiCDRelease = false;
+	
+	public CoverArtArchive coverArtArchive;
 	
 }

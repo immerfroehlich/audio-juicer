@@ -8,28 +8,41 @@ Important features (sorted by priority from the most important on the top):
 - [ ] Fixed lame presets (with joint stereo) [Really needed? Just preset standard implemented. For classical music FLAC would probably better.
 - [x] Musicbrainz / CDDB retrieval of Artist name, Album name, Song name
 - [ ] Artwork retrieval
+- [ ] Debian package maintaining
 - [ ] For Archiving purposes Hash generation for each file and comparison (sha2)
 - [ ] For Archiving: Parallel generation of mp3 and flac
 - [ ] GUI (JavaFX or Swing)
 - [ ] User presets (just enter the command line)
-- [ ] If not available easy user upload of artist name etc to Musicbrainz
+- [ ] If not available easy user upload of artist name etc to Musicbrainz (is this really needed? Musicbrainz already has a GUI on their web page, ask the user to input their CD info on their web page.)
 - [ ] (Archive database?)
 
 
-Uses: cdparanoia and lame (ffmpeg for flac?) command line tools
+Uses: cdparanoia and lame (ffmpeg for flac?) for audio and
+imageagick for image resizing command line tools
 
 TODO / Backlog
 ------------------------
 - [x] Pregap track (inaudible) - don't convert it to mp3. Remove the wav (Example: Genesis - Selling England..., Vangelis - Blade Runner)
 - [x] Add support for hidden audible pregap tracks (Example: Die Ärzte - 13)
 - [ ] The first release year must be searched by a special query and not via discid. Often the first release has been a vinyl/Schellack record
-- Blade Runner throws IndexOutOfBoundsException
+- [ ] Blade Runner throws IndexOutOfBoundsException
 java.lang.IndexOutOfBoundsException: Index: 12, Size: 12
 	at java.util.ArrayList.rangeCheck(ArrayList.java:653)
 	at java.util.ArrayList.get(ArrayList.java:429)
 	at App.createMp3OfEachWav(App.java:208)
 	at App.main(App.java:94)
 Seems to be a pregap track
+
+
+Used libraries:
+=======================
+mp3agic - for manipulation of id3 tags
+URL: https://github.com/mpatric/mp3agic
+Licence: MIT
+
+coverartarchive-api - For image download from Cover Art Archive
+URL: https://github.com/lastfm/coverartarchive-api
+Licence: Apache 2.0
 
 
 Information retrieval sites:
@@ -43,6 +56,8 @@ Lame:
 lame --preset standard sample.wav sample.mp3
 (Joint Stereo is default, -q 0 for best quality algorithms but more computing power needed)
 
+ImageMagick (Front cover resizing):
+convert -resize 300x300 front.jpg front_small.jp
 
 
 Infos:
@@ -222,6 +237,12 @@ https://unix.stackexchange.com/questions/84915/add-album-art-cover-to-mp3-ogg-fi
 
 lame --ti /path/to/file.jpg audio.mp3
 
+Discussions about jpeg file size for embedding images into mp3:
+https://www.richardfarrar.com/embedding-album-art-in-mp3-files/
+
+Resizing images with imagemagick:
+https://askubuntu.com/questions/1164/how-to-easily-resize-images-via-command-line
+
 
 REST Services with JSON in Java (with Jersey [and Jackson?]):
 --------------------------------------------------------------
@@ -246,3 +267,4 @@ Allowed characters in specific file system file names:
 -------------------------------------------------------
 https://stackoverflow.com/questions/19503697/unicode-filenames-on-fat-32
 https://serverfault.com/questions/242110/which-common-charecters-are-illegal-in-unix-and-windows-filesystems
+

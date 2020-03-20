@@ -13,6 +13,7 @@ import org.academiadecodigo.bootcamp.scanners.string.StringInputScanner;
 import de.immerfroehlich.command.Command;
 import de.immerfroehlich.command.CommandExecutor;
 import de.immerfroehlich.command.Result;
+import de.immerfroehlich.coverartarchive.CoverArtArchiveDownloader;
 import de.immerfroehlich.discid.DiscIdCalculator;
 import de.immerfroehlich.javajuicer.model.Mp3Track;
 import de.immerfroehlich.javajuicer.utils.FATCharRemover;
@@ -53,10 +54,8 @@ public class App {
     	String releaseDate = promptForReleaseYear(releases, "Select first release date");
     	Medium medium = promptForMedium(release);
     	
-    	List<Mp3Track> mp3Tracks = mapToMp3Tracks(release, releaseDate, medium);
     	
-    	
-    	String rootPath = "/home/andreas/Musik/Archiv";
+    	String rootPath = "/home/andreas/Musik/Archiv"; //TODO get the root path
     	String cdArtist = release.artistCredit.get(0).name;
     	String cdTitle = release.title;
     	cdArtist = FATCharRemover.removeUnallowedChars(cdArtist);
@@ -69,7 +68,13 @@ public class App {
     		mp3Path += cdPathAddon;
     		wavPath += cdPathAddon;
     	}
+    	String imagePath = mp3Path + "/" + "images";
     	
+    	    	
+    	CoverArtArchiveDownloader coverArtDownloader = new CoverArtArchiveDownloader();
+    	String frontCoverSmall = coverArtDownloader.downloadImages(release, imagePath); //TODO use this path to check if the image is available in mapMp3
+    	
+    	List<Mp3Track> mp3Tracks = mapToMp3Tracks(release, releaseDate, medium, imagePath);
     	
     	System.out.println(mp3Path);
     	System.out.println(wavPath);
@@ -83,6 +88,7 @@ public class App {
     	findPregapTrack(mp3Tracks, wavPath);
     	
     	createMp3OfEachWav(wavPath, mp3Path, mp3Tracks);
+    	
     }
 
 	private static void findPregapTrack(List<Mp3Track> mp3Tracks, String wavPath) {
@@ -175,8 +181,15 @@ public class App {
 		return release.media.get(number);
 	}
 
-	private static List<Mp3Track> mapToMp3Tracks(Release release, String releaseDate, Medium medium) {
+	private static List<Mp3Track> mapToMp3Tracks(Release release, String releaseDate, Medium medium, String imagePath) {
     	List<Mp3Track> tracks = new ArrayList<>();
+    	
+    	boolean hasFrontCover = release.coverArtArchive.front;
+    	String frontCoverPath = "";
+		if(hasFrontCover) {
+    		frontCoverPath = imagePath + "/" + "front_small.jpg"; //TODO check if available first? Fixed file name?
+    	}
+
     	
     	Pregap pregap = medium.pregap;
     	boolean pregapAvailable = pregap != null;
@@ -197,6 +210,10 @@ public class App {
 			mp3Track.releaseYear = release.date;
 			mp3Track.firstReleaseYear = releaseDate;
 			mp3Track.title = pregap.title;
+			if(hasFrontCover) {
+	    		mp3Track.cover.hasFrontCover = true;
+	    		mp3Track.cover.frontCoverPath = frontCoverPath;
+	    	}
 			tracks.add(mp3Track);
     	}
     	
@@ -206,6 +223,10 @@ public class App {
 			mp3Track.releaseYear = release.date;
 			mp3Track.firstReleaseYear = releaseDate;
 			mp3Track.title = track.title;
+			if(hasFrontCover) {
+	    		mp3Track.cover.hasFrontCover = true;
+	    		mp3Track.cover.frontCoverPath = frontCoverPath;
+	    	}
 			tracks.add(mp3Track);
 		}
 		return tracks;
@@ -344,6 +365,11 @@ public class App {
 		command.addParameter(track.firstReleaseYear);
 		command.addParameter("--tn");
 		command.addParameter(trackNumber);
+		
+		if(track.cover.hasFrontCover) {
+			command.addParameter("--ti");
+			command.addParameter(track.cover.frontCoverPath);
+		}
 		
 		command.addParameter(fullQualifiedInputFile);
 		command.addParameter(fullQualifiedOuputFile);
