@@ -74,7 +74,9 @@ mainClassName = 'App'
 /*
  * Execution phase configuration.
  */
-build.doFirst {
+tasks.compileJava.doFirst {
+	println 'Do first in compileJava script called.'
+
 	//Build the libdiscid Java Binding first.
 	exec {
 		workingDir 'libdiscid-java-wrapper'

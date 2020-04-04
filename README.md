@@ -16,9 +16,9 @@ The following build instruction works for the mentioned combination.
 
 To build and run it do the following:
 
-sudo apt-get install openjdk-8-jdk make gcc libdiscid0 libdiscid-dev cdparanoia lame imagemagick
+sudo apt-get install openjdk-8-jdk gradle ant make gcc libdiscid0 libdiscid-dev cdparanoia lame imagemagick
 
-git checkout https://github.com/immerfroehlich/audio-juicer
+git clone https://github.com/immerfroehlich/audio-juicer
 
 cd audio-juicer
 
