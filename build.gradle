@@ -62,7 +62,7 @@ eclipse.classpath.file {
   withXml { xml ->
     def node = xml.asNode()
     def container = node.find { it.@path == 'org.springsource.ide.eclipse.gradle.classpathcontainer' }
-   container.appendNode('attributes').appendNode('attribute', [name: 'org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY', value:"$project.name/native/build"])
+   container.appendNode('attributes').appendNode('attribute', [name: 'org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY', value:"$project.name/libdiscid-java-wrapper/native/build"])
   }
 }
 
