@@ -55,6 +55,7 @@ TODO / Backlog
 - [x] Add support for hidden audible pregap tracks (Example: Die Ärzte - 13)
 - [ ] What about titles that are too long? Example Al Di Meola - Casino
 - [x] Selection of cdrom device
+- [ ] Remove Jitpack.io from the build and directly integrate the submodules with git and gradle
 - [ ] Migrate to an OpenJDK version that is supported by Ubuntu (currently that is OpenJDK 11)
 - [ ] Read TOC and isrc for submission of discId to musicbrainz
 - [ ] If there is only one disc for discid don't ask the user for input.

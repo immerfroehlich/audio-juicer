@@ -35,7 +35,7 @@ dependencies {
     compile 'com.github.academia-de-codigo:prompt-view:master-SNAPSHOT'
     
     compile files ('libdiscid-java-wrapper/native/build')
-    compile files ('libdiscid-java-wrapper/libdiscid-java-wrapper.jar')
+    compile files ('libdiscid-java-wrapper/build/libs/libdiscid-java-wrapper.jar')
     
     //Dependencies for Musicbrainz Service
     compile 'org.glassfish.jersey.core:jersey-client:2.29.1'
