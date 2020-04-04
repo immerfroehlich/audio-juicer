@@ -1,7 +1,35 @@
+# Audio Juicer
 
-
-Simple Tool that rips wav files from CD and converts them to MP3 or whatever you like
+Simple Tool that rips wav files from audio CDs and converts them to MP3 or whatever you like
 by using command line tools.
+Technically it's a frontend to cdparanoia, lame and others (in future versions).
+
+Build
+========
+
+Uses: cdparanoia and lame (ffmpeg for flac?) for audio and
+imageagick for image resizing command line tools
+and lsblk for device detection (should be included in every LSB linux I guess).
+
+The build currently has only been tested on Ubuntu 18.04 LTS (Bionic Beaver) for the amd64 platform.
+The following build instruction works for the mentioned combination.
+
+To build and run it do the following:
+
+sudo apt-get install openjdk-8-jdk make gcc libdiscid cdparanoia lame imagemagick
+
+git checkout https://github.com/immerfroehlich/audio-juicer
+
+cd audio-juicer
+
+./gradlew build
+
+Extract the content of build/distributions/JavaJuicer.zip to where you want the compiled application
+to be and run ./JavaJuicer in the bin directory.
+
+
+Features
+==========
 
 Important features (sorted by priority from the most important on the top):
 - [ ] Free Software GPLv2 or GPLv3
@@ -18,15 +46,13 @@ Important features (sorted by priority from the most important on the top):
 - [ ] (Archive database?)
 
 
-Uses: cdparanoia and lame (ffmpeg for flac?) for audio and
-imageagick for image resizing command line tools
-
 TODO / Backlog
 ------------------------
 - [x] Pregap track (inaudible) - don't convert it to mp3. Remove the wav (Example: Genesis - Selling England..., Vangelis - Blade Runner)
 - [x] Add support for hidden audible pregap tracks (Example: Die Ärzte - 13)
 - [ ] What about titles that are too long? Example Al Di Meola - Casino
-- [ ] Selection of cdrom device
+- [x] Selection of cdrom device
+- [ ] Migrate to an OpenJDK version that is supported by Ubuntu (currently that is OpenJDK 11)
 - [ ] Read TOC and isrc for submission of discId to musicbrainz
 - [ ] If there is only one disc for discid don't ask the user for input.
 - [ ] Show progress bar during cdparanoia ripping process
@@ -83,6 +109,8 @@ Feature Overview:
 ABCDE - Uses musicbrainz ws1 service which is out of support, currently not working
 
 
+Development Knowledge Ressources
+=================================
 
 Information retrieval sites:
 ------------------------
