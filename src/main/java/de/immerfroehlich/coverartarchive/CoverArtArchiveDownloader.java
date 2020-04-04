@@ -18,30 +18,65 @@ import fm.last.musicbrainz.coverart.impl.DefaultCoverArtArchiveClient;
 
 public class CoverArtArchiveDownloader {
 	
-	public String downloadImages(Release release, String path) {
+	/**
+	 * 
+	 * @param release
+	 * @param path
+	 * @return true if the front cover was downloaded, else if no front cover is available.
+	 */
+	public boolean downloadImages(Release release, String path) {
+		boolean frontCoverDownloaded = false;
+		boolean backCoverDownloaded = false;
+		
+		String frontFilePath = path + "/" + "front.jpg";
+		String backFilePath = path + "/" + "back.jpg";
+		File file = new File(frontFilePath);
+		if(file.exists()) {
+			frontCoverDownloaded = true;
+			System.out.println("Front cover manually/previously provided.");
+		}
+		file = new File(backFilePath);
+		if(file.exists()) {
+			backCoverDownloaded = true;
+			System.out.println("Back cover manually/previously provided.");
+		}
+		
+		CoverArtArchive coverInfo = release.coverArtArchive;
+		if(coverInfo == null) {
+			System.out.println("No cover art exists for the selected release. Please upload it to musicbrainz.org");
+			return false;
+		}
+		
 		boolean viaHttps = false;
 		CoverArtArchiveClient client = new DefaultCoverArtArchiveClient(viaHttps);
 		UUID mbid = UUID.fromString(release.id);
-		String frontCoverSmallPath = "";
 		
 		CoverArt coverArt = null;
 		coverArt = client.getByMbid(mbid);
-		if (coverArt != null) {
-			CoverArtArchive coverInfo = release.coverArtArchive;
-			if(coverInfo.front) {
-				CoverArtImage image = coverArt.getFrontImage();
-				String filename = "front";
-				downloadImage(image, filename, path);
-				frontCoverSmallPath = resizeImage(filename, path);
-			}
-			if(coverInfo.back) {
-				CoverArtImage image = coverArt.getBackImage();
-				String filename = "back";
-				downloadImage(image, filename, path);
-			}
+		boolean coverArtExistsForTheRelease = coverArt != null;
+		if (!coverArtExistsForTheRelease) {
+			System.out.println("No cover art exists for the selected release. Please upload it to musicbrainz.org");
 		}
 		
-		return frontCoverSmallPath;	
+		if(coverInfo.front && !frontCoverDownloaded) {
+			CoverArtImage image = coverArt.getFrontImage();
+			String filename = "front";
+			downloadImage(image, filename, path);
+			frontCoverDownloaded = true;
+		}
+		if(!coverInfo.front) {
+			System.out.println("No front cover exists for the selected release. Please upload it to musicbrainz.org");
+		}
+		if(coverInfo.back && !backCoverDownloaded) {
+			CoverArtImage image = coverArt.getBackImage();
+			String filename = "back";
+			downloadImage(image, filename, path);
+		}
+		if(!coverInfo.back) {
+			System.out.println("No back cover exists for the selected release. Please upload it to musicbrainz.org");
+		}
+		
+		return frontCoverDownloaded;	
 	}
 	
 	private void downloadImage(CoverArtImage image, String filename, String path) {
@@ -60,9 +95,9 @@ public class CoverArtArchiveDownloader {
 		}
 	}
 	
-	private String resizeImage(String filename, String path) {
+	public String resizeFrontCoverImage(String path) {
 		
-		String source = path + "/" + filename + ".jpg";
+		String source = path + "/" + "front.jpg";
 		String target = path + "/" + "front_small.jpg";
 		
 		Command command = new Command();

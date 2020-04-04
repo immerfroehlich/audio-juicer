@@ -1,0 +1,3 @@
+[submodule "libdiscid-java-wrapper"]
+	path = libdiscid-java-wrapper
+	url = https://github.com/immerfroehlich/libdiscid-java-wrapper

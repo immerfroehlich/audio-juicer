@@ -34,8 +34,8 @@ dependencies {
     compile 'com.github.immerfroehlich:CommandExecutor:master-SNAPSHOT'
     compile 'com.github.academia-de-codigo:prompt-view:master-SNAPSHOT'
     
-    compile files ('native/')
-    compile files ('libs/musicbrainz-discid.jar')
+    compile files ('libdiscid-java-wrapper/native/build')
+    compile files ('libdiscid-java-wrapper/libdiscid-java-wrapper.jar')
     
     //Dependencies for Musicbrainz Service
     compile 'org.glassfish.jersey.core:jersey-client:2.29.1'
@@ -62,12 +62,23 @@ eclipse.classpath.file {
   withXml { xml ->
     def node = xml.asNode()
     def container = node.find { it.@path == 'org.springsource.ide.eclipse.gradle.classpathcontainer' }
-   container.appendNode('attributes').appendNode('attribute', [name: 'org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY', value:"$project.name/native"])
+   container.appendNode('attributes').appendNode('attribute', [name: 'org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY', value:"$project.name/native/build"])
   }
 }
 
-applicationDefaultJvmArgs = ["-Djava.library.path=../lib/native/linux/amd64"]
+applicationDefaultJvmArgs = ["-Djava.library.path=../lib/linux/amd64"]
 // Define the main class for the application
 //mainClassName = 'de.immerfroehlich.Main'
 mainClassName = 'App'
 
+/*
+ * Execution phase configuration.
+ */
+build.doFirst {
+	//Build the libdiscid Java Binding first.
+	exec {
+		workingDir 'libdiscid-java-wrapper'
+        executable 'ant'
+        args 'all'
+    }
+}

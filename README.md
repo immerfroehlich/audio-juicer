@@ -7,7 +7,8 @@ Important features (sorted by priority from the most important on the top):
 - [ ] Free Software GPLv2 or GPLv3
 - [ ] Fixed lame presets (with joint stereo) [Really needed? Just preset standard implemented. For classical music FLAC would probably better.
 - [x] Musicbrainz / CDDB retrieval of Artist name, Album name, Song name
-- [ ] Artwork retrieval
+- [x] Artwork retrieval
+- [ ] Musicbrainz data submission (for CDs that are not yet listed)
 - [ ] Debian package maintaining
 - [ ] For Archiving purposes Hash generation for each file and comparison (sha2)
 - [ ] For Archiving: Parallel generation of mp3 and flac
@@ -24,6 +25,13 @@ TODO / Backlog
 ------------------------
 - [x] Pregap track (inaudible) - don't convert it to mp3. Remove the wav (Example: Genesis - Selling England..., Vangelis - Blade Runner)
 - [x] Add support for hidden audible pregap tracks (Example: Die Ärzte - 13)
+- [ ] What about titles that are too long? Example Al Di Meola - Casino
+- [ ] Selection of cdrom device
+- [ ] Read TOC and isrc for submission of discId to musicbrainz
+- [ ] If there is only one disc for discid don't ask the user for input.
+- [ ] Show progress bar during cdparanoia ripping process
+- [ ] Logging for debug and info and error
+- [ ] Verbose mode with logging info
 - [ ] The first release year must be searched by a special query and not via discid. Often the first release has been a vinyl/Schellack record
 - [ ] Blade Runner throws IndexOutOfBoundsException
 java.lang.IndexOutOfBoundsException: Index: 12, Size: 12
@@ -32,6 +40,10 @@ java.lang.IndexOutOfBoundsException: Index: 12, Size: 12
 	at App.createMp3OfEachWav(App.java:208)
 	at App.main(App.java:94)
 Seems to be a pregap track
+- [ ] Input filtering and validation with retry possibility
+- [ ] Adding Strings to resource loader
+- [ ] Localization
+- [ ] Make it compileable and runnable on Windows with MinGW
 
 
 Used libraries:
@@ -43,6 +55,33 @@ Licence: MIT
 coverartarchive-api - For image download from Cover Art Archive
 URL: https://github.com/lastfm/coverartarchive-api
 Licence: Apache 2.0
+
+lsblk --json --output name,type
+Outputs all bulk devices as json
+
+imagemagick - To convert the artwork
+
+
+Alternatives
+=============
+
+- ripperX
+- Asunder
+- KIO-audiocd (Dolphin integration)
+- K3B
+- Sound Juicer
+- ABCDE (A better CD encoder - https://abcde.einval.com/wiki/)
+- Audex
+- Rubyripper
+- Flacon
+- Whipper
+- CDNfiy
+
+Source: https://www.slant.co/topics/2443/~best-cd-rippers-for-linuxs
+
+Feature Overview:
+ABCDE - Uses musicbrainz ws1 service which is out of support, currently not working
+
 
 
 Information retrieval sites:
@@ -57,7 +96,7 @@ lame --preset standard sample.wav sample.mp3
 (Joint Stereo is default, -q 0 for best quality algorithms but more computing power needed)
 
 ImageMagick (Front cover resizing):
-convert -resize 300x300 front.jpg front_small.jp
+convert -resize 300x300 front.jpg front_small.jpg
 
 
 Infos:
@@ -178,6 +217,17 @@ https://stackoverflow.com/questions/579734/assigning-strings-to-arrays-of-charac
 https://stackoverflow.com/questions/6238785/newstringutf-and-freeing-memory
 
 https://www.cs-fundamentals.com/c-programming/static-and-dynamic-linking-in-c.php
+
+
+Gradle building JNI native projects:
+--------------------------------------
+Examples:
+https://github.com/luncliff/cpp-gradle-in-kor
+https://github.com/cory-johannsen/gradle-jni-example
+
+https://docs.gradle.org/current/userguide/native_software.html
+
+
 
 Gradle
 ------------------------------------------

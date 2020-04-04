@@ -14,8 +14,11 @@ import de.immerfroehlich.command.Command;
 import de.immerfroehlich.command.CommandExecutor;
 import de.immerfroehlich.command.Result;
 import de.immerfroehlich.coverartarchive.CoverArtArchiveDownloader;
+import de.immerfroehlich.deviceinfo.BlockDevice;
+import de.immerfroehlich.deviceinfo.DeviceInfo;
 import de.immerfroehlich.discid.DiscIdCalculator;
 import de.immerfroehlich.javajuicer.model.Mp3Track;
+import de.immerfroehlich.javajuicer.utils.ConsolePrompt;
 import de.immerfroehlich.javajuicer.utils.FATCharRemover;
 import de.immerfroehlich.musicbrainz.MusicbrainzWs2Service;
 import de.immerfroehlich.musicbrainz.model.Disc;
@@ -23,12 +26,16 @@ import de.immerfroehlich.musicbrainz.model.Medium;
 import de.immerfroehlich.musicbrainz.model.Pregap;
 import de.immerfroehlich.musicbrainz.model.Release;
 import de.immerfroehlich.musicbrainz.model.Track;
+import de.immerfroehlich.prompt.Prompter;
 
 public class App {
 
     public static void main(String[] args) {
     	
-    	String discid = calculateDiscIdByDevicePath("/dev/sr0");
+    	String deviceName = promptForDeviceName();
+    	
+    	String discid = calculateDiscIdByDevicePath(deviceName);
+    	System.out.println("Calculated DiscId is: " + discid);
     	Optional<Disc> discOpt = lookupDiscById(discid);
     	List<Release> releases;
     	if(!discOpt.isPresent()) {
@@ -61,35 +68,94 @@ public class App {
     	cdArtist = FATCharRemover.removeUnallowedChars(cdArtist);
     	cdTitle = FATCharRemover.removeUnallowedChars(cdTitle);
     	
-    	String mp3Path = rootPath + "/" + "mp3" + "/" + cdArtist + "/" + cdTitle;
-    	String wavPath = rootPath + "/" + "wav" + "/" + cdArtist + "/" + cdTitle;
+    	String mp3RootAlbumPath = rootPath + "/" + "mp3" + "/" + cdArtist + "/" + cdTitle;
+    	String mp3CdPath = mp3RootAlbumPath;
+    	String wavCdPath = rootPath + "/" + "wav" + "/" + cdArtist + "/" + cdTitle;
     	if(release.multiCDRelease) {
     		String cdPathAddon = "/CD" + medium.position;
-    		mp3Path += cdPathAddon;
-    		wavPath += cdPathAddon;
+    		mp3CdPath += cdPathAddon;
+    		wavCdPath += cdPathAddon;
     	}
-    	String imagePath = mp3Path + "/" + "images";
+    	String imagePath = mp3RootAlbumPath + "/" + "images";
     	
-    	    	
-    	CoverArtArchiveDownloader coverArtDownloader = new CoverArtArchiveDownloader();
-    	String frontCoverSmall = coverArtDownloader.downloadImages(release, imagePath); //TODO use this path to check if the image is available in mapMp3
     	
-    	List<Mp3Track> mp3Tracks = mapToMp3Tracks(release, releaseDate, medium, imagePath);
+    	List<Mp3Track> mp3Tracks = mapToMp3Tracks(release, releaseDate, medium);
     	
-    	System.out.println(mp3Path);
-    	System.out.println(wavPath);
+    	System.out.println(mp3CdPath);
+    	System.out.println(wavCdPath);
     	promptCorrect(mp3Tracks);
     	
-    	createPathWithParents(mp3Path);
-    	createPathWithParents(wavPath);
+    	CoverArtArchiveDownloader coverArtDownloader = new CoverArtArchiveDownloader();
+    	boolean frontCoverAvailable = coverArtDownloader.downloadImages(release, imagePath);
+    	frontCoverAvailable = promptForManualFrontCoverProvision(frontCoverAvailable, imagePath);
+    	addFrontCoverPathTo(mp3Tracks, frontCoverAvailable, imagePath, coverArtDownloader);
     	
-    	ripWavFromStdCdromTo(wavPath);
+    	createPathWithParents(mp3CdPath);
+    	createPathWithParents(wavCdPath);
     	
-    	findPregapTrack(mp3Tracks, wavPath);
+    	ripWavFromStdCdromTo(wavCdPath);
     	
-    	createMp3OfEachWav(wavPath, mp3Path, mp3Tracks);
+    	findPregapTrack(mp3Tracks, wavCdPath);
+    	
+    	createMp3OfEachWav(wavCdPath, mp3CdPath, mp3Tracks);
     	
     }
+
+	private static String promptForDeviceName() {
+		//TODO String standardDevice = "/dev/sr0";
+		String standardDevice = "gibbet nich";
+		DeviceInfo devInfo = new DeviceInfo();
+		
+		List<BlockDevice> devices = devInfo.getRomDevices();
+		Optional<BlockDevice> deviceOpt = devices.stream()
+			.filter(dev -> dev.name.equals(standardDevice))
+			.findFirst();
+		
+		BlockDevice device;
+		device = deviceOpt.orElseGet(() -> {
+			
+			return Prompter.askSelectFromList(devices, "Please select a device: ", dev -> {
+				return dev.name;
+			});
+		});
+		
+		return "/dev/" + device.name;
+	}
+
+	private static boolean promptForManualFrontCoverProvision(boolean frontCoverAvailable, String imagePath) {
+		if(frontCoverAvailable) return frontCoverAvailable;
+		
+    	System.out.print("Would you like to manually provide a full size front cover to " + imagePath + "front.jpg ?");
+    	String question = "Then copy it to the given path and type 'y' afterwards (y/n)";
+    	boolean correct = Prompter.askYesNo(question);
+    	
+    	if(!correct) return false;
+    	
+    	String fullPath = imagePath + "front.jpg";
+    	File file = new File(fullPath);
+    	if(file.exists()) return true;
+    	
+    	System.out.println("The front cover at " + fullPath + " could not be found.");
+    	question = "Would you like to correct? (y/n)";
+    	
+    	correct = Prompter.askYesNo(question);
+    	
+    	if(!correct) return false;
+    	
+    	return promptForManualFrontCoverProvision(frontCoverAvailable, imagePath);
+    }
+
+	private static void addFrontCoverPathTo(List<Mp3Track> mp3Tracks, boolean frontCoverAvailable, String imagePath, CoverArtArchiveDownloader coverArtDownloader) {
+		if(!frontCoverAvailable) return;
+		
+		String fullImagePath = coverArtDownloader.resizeFrontCoverImage(imagePath);
+		if(fullImagePath.isEmpty()) return;
+		
+		for(Mp3Track mp3Track : mp3Tracks) {
+			mp3Track.cover.hasFrontCover = true;
+			mp3Track.cover.frontCoverPath = fullImagePath;
+		}
+	}
 
 	private static void findPregapTrack(List<Mp3Track> mp3Tracks, String wavPath) {
 		//TODO: Load pregaptrack info from musicbrainz
@@ -106,7 +172,7 @@ public class App {
     					+ "old CD Players.\r\n"
     					+ "But it could be a hidden track that is audible but not listed on the cover.\r\n"
     					+ "Please listen to the WAV files and decide.\r\n\r\n");
-    			boolean yes = askYesNo("Is it a hidden audible track?");
+    			boolean yes = Prompter.askYesNo("Is it a hidden audible track?");
     			if(yes) {
     				System.out.println("Please add the track to the selected release on musicbrain.org as track 00 and start again.");
     			}
@@ -114,7 +180,7 @@ public class App {
     				File file = files.get(0);
     				String filename = file.getName();
     				System.out.println("If " + filename + " is the pregap track it will be deleted and the application tries to continue.");
-    				yes = askYesNo("Is " + filename + " the inaudible pregap track?");
+    				yes = Prompter.askYesNo("Is " + filename + " the inaudible pregap track?");
     				if(yes) {
     					file.delete();
     				}
@@ -141,11 +207,16 @@ public class App {
 	}
 
 	private static String promptForReleaseTitle() {
-    	Prompt prompt = new Prompt(System.in, System.out);
-    	StringInputScanner scanner = new StringInputScanner();
+		
+    	System.out.println("musicbrainz.org doesn't provide any title information for your CD. Please log in to musicbrainz.org and provide the information.");
+    	System.out.println("You can try to enter the release title. Maybe you will find a release with the same track list.");
     	
-    	System.out.print("Release Title");
-    	String releaseTitle = prompt.getUserInput(scanner);
+    	boolean yes = ConsolePrompt.yesNoQuestion("Would you like to try? (y/n)");
+    	if(!yes) {
+    		System.exit(0);
+    	}
+    	
+    	String releaseTitle = ConsolePrompt.askFreeText("Release Title");
 		return releaseTitle;
 	}
 
@@ -181,15 +252,8 @@ public class App {
 		return release.media.get(number);
 	}
 
-	private static List<Mp3Track> mapToMp3Tracks(Release release, String releaseDate, Medium medium, String imagePath) {
+	private static List<Mp3Track> mapToMp3Tracks(Release release, String releaseDate, Medium medium) {
     	List<Mp3Track> tracks = new ArrayList<>();
-    	
-    	boolean hasFrontCover = release.coverArtArchive.front;
-    	String frontCoverPath = "";
-		if(hasFrontCover) {
-    		frontCoverPath = imagePath + "/" + "front_small.jpg"; //TODO check if available first? Fixed file name?
-    	}
-
     	
     	Pregap pregap = medium.pregap;
     	boolean pregapAvailable = pregap != null;
@@ -210,10 +274,6 @@ public class App {
 			mp3Track.releaseYear = release.date;
 			mp3Track.firstReleaseYear = releaseDate;
 			mp3Track.title = pregap.title;
-			if(hasFrontCover) {
-	    		mp3Track.cover.hasFrontCover = true;
-	    		mp3Track.cover.frontCoverPath = frontCoverPath;
-	    	}
 			tracks.add(mp3Track);
     	}
     	
@@ -223,61 +283,42 @@ public class App {
 			mp3Track.releaseYear = release.date;
 			mp3Track.firstReleaseYear = releaseDate;
 			mp3Track.title = track.title;
-			if(hasFrontCover) {
-	    		mp3Track.cover.hasFrontCover = true;
-	    		mp3Track.cover.frontCoverPath = frontCoverPath;
-	    	}
 			tracks.add(mp3Track);
 		}
 		return tracks;
 	}
 	
 	private static Release promptForRelease(List<Release> releases, String text) {
-    	Prompt prompt = new Prompt(System.in, System.out);
-    	IntegerInputScanner scanner = new IntegerInputScanner();
-    	
-    	Release release;
-    	for(int i = 0; i < releases.size(); i++) {
-    		release = releases.get(i);
-    		System.out.println("[" + i + "]");
-			System.out.println(release.title);
-			System.out.println(release.date);
-			System.out.println(release.barcode);
-			System.out.println(release.artistCredit.stream().map(x -> x.name).collect(Collectors.joining()));
+		return Prompter.askSelectFromList(releases, text, (release) -> {
+			String entry = "\n"
+					+ release.title + "\n" 
+					+ release.date + "\n"
+					+ release.barcode + "\n"
+					+ release.artistCredit.stream().map(x -> x.name).collect(Collectors.joining());
 			
-			System.out.println("---------------");
-		}
-    	
-    	System.out.print(text);
-    	Integer number = prompt.getUserInput(scanner);
-		
-    	return releases.get(number);
+			return entry;
+		});
 	}
 	
 	private static String promptForReleaseYear(List<Release> releases, String text) {
-		Prompt prompt = new Prompt(System.in, System.out);
-		IntegerInputScanner scanner = new IntegerInputScanner();
+		String additionalEntry = "Or enter release year/date manually";
 		
-		Release release;
-		int i = 0;
-		while(i < releases.size()) {
-			release = releases.get(i);
-			System.out.println("[" + i + "] " + release.date);
-			i++;
-		}
+		Integer number = Prompter.askSelectFromList(releases, additionalEntry, text, (release) -> {
+			String entry = "\n"
+					+ release.title + "\n" 
+					+ release.date + "\n"
+					+ release.barcode + "\n"
+					+ release.artistCredit.stream().map(x -> x.name).collect(Collectors.joining());
+			
+			return entry;
+		});
 		
-		System.out.println("[" + (i+1) + "] Or enter release year/date manually:");
-		System.out.println("---------------");
-		
-		System.out.println(text);
-		Integer number = prompt.getUserInput(scanner);
 		String releaseDate;		
 		
 		boolean manuallySelected = number > (releases.size() -1);
 		if(manuallySelected) {
-			System.out.println("Enter release year/date");
-			StringInputScanner stringScanner = new StringInputScanner();
-			releaseDate = prompt.getUserInput(stringScanner);
+			String question = "Enter release year/date";
+			releaseDate = Prompter.askForString(question);
 		}
 		else {
 			releaseDate = releases.get(number).date;
@@ -441,66 +482,5 @@ public class App {
     	if(!correct) {
     		System.exit(0);
     	}
-		
-    	
-//    	Release album = new Release();
-//    	
-//    	Prompt prompt = new Prompt(System.in, System.out);
-//    	StringInputScanner scanner = new StringInputScanner();
-//    	
-//    	System.out.print("Artist/Band");
-//    	album.artist.name = prompt.getUserInput(scanner);
-//    	
-//    	System.out.print("Album-Name");
-//    	album.title = prompt.getUserInput(scanner);
-//    	
-//    	System.out.print("Erscheinungsjahr (Erstveröffentlichung)");
-//    	album.date = prompt.getUserInput(scanner);
-//    	
-//    	
-//    	Track track1 = new Track();
-//		System.out.print("Titel");
-//		track1.title = prompt.getUserInput(scanner);
-//		album.tracks.add(track1);
-//		
-//		boolean next = false;
-//		System.out.print("Next (y/n)");
-//		next = askForNext(prompt, scanner);
-//    	
-//    	while(next) {
-//    		Track track = new Track();
-//    		
-//    		System.out.print("Titel");
-//    		track.title = prompt.getUserInput(scanner);
-//    		
-//    		album.tracks.add(track);
-//    		
-//    		next = askForNext(prompt, scanner);
-//    		
-//    	}
-//    	
-//    	return album;
     }
-
-	public static boolean askForNext(Prompt prompt, StringInputScanner scanner) {
-		boolean next;
-		String nextS = prompt.getUserInput(scanner);
-		if(nextS.equals("y")) {
-			next = true;
-		}
-		else {
-			next = false;
-		}
-		return next;
-	}
-	
-	public static boolean askYesNo(String question) {
-		Prompt prompt = new Prompt(System.in, System.out);
-    	StringInputScanner scanner = new StringInputScanner();
-    	
-    	System.out.print(question);
-    	String yesNo = prompt.getUserInput(scanner);
-    	boolean correct = yesNo.equals("y") ? true : false;
-    	return correct;
-	}
 }
