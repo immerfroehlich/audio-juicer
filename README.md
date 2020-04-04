@@ -16,7 +16,7 @@ The following build instruction works for the mentioned combination.
 
 To build and run it do the following:
 
-sudo apt-get install openjdk-8-jdk make gcc libdiscid cdparanoia lame imagemagick
+sudo apt-get install openjdk-8-jdk make gcc libdiscid0 libdiscid-dev cdparanoia lame imagemagick
 
 git checkout https://github.com/immerfroehlich/audio-juicer
 
@@ -26,6 +26,9 @@ cd audio-juicer
 
 Extract the content of build/distributions/JavaJuicer.zip to where you want the compiled application
 to be and run ./JavaJuicer in the bin directory.
+
+BE WARNED: Currently the tool has a few fixed configurations for the paths. Currently all ripped audio will
+be saved in ~/Musik/Archiv
 
 
 Features
