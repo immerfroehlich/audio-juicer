@@ -17,6 +17,7 @@ import de.immerfroehlich.coverartarchive.CoverArtArchiveDownloader;
 import de.immerfroehlich.deviceinfo.BlockDevice;
 import de.immerfroehlich.deviceinfo.DeviceInfo;
 import de.immerfroehlich.discid.DiscIdCalculator;
+import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
 import de.immerfroehlich.javajuicer.model.Mp3Track;
 import de.immerfroehlich.javajuicer.utils.ConsolePrompt;
 import de.immerfroehlich.javajuicer.utils.FATCharRemover;
@@ -27,16 +28,21 @@ import de.immerfroehlich.musicbrainz.model.Pregap;
 import de.immerfroehlich.musicbrainz.model.Release;
 import de.immerfroehlich.musicbrainz.model.Track;
 import de.immerfroehlich.prompt.Prompter;
+import de.immerfroehlich.services.LibDiscIdService;
+import de.immerfroehlich.services.MusicBrainzService;
 
 public class App {
 
     public static void main(String[] args) {
     	
+    	LibDiscIdService libDiscIdService = new LibDiscIdService();
+    	MusicBrainzService musicbrainzService = new MusicBrainzService();
+    	
     	String deviceName = promptForDeviceName();
     	
-    	String discid = calculateDiscIdByDevicePath(deviceName);
+    	String discid = libDiscIdService.calculateDiscIdByDevicePath(deviceName);
     	System.out.println("Calculated DiscId is: " + discid);
-    	Optional<Disc> discOpt = lookupDiscById(discid);
+    	Optional<Disc> discOpt = musicbrainzService.lookupDiscById(discid);
     	List<Release> releases;
     	if(!discOpt.isPresent()) {
     		String releaseTitle = promptForReleaseTitle();
@@ -78,8 +84,8 @@ public class App {
     	}
     	String imagePath = mp3RootAlbumPath + "/" + "images";
     	
-    	
-    	List<Mp3Track> mp3Tracks = mapToMp3Tracks(release, releaseDate, medium);
+    	Mp3TrackMapper mp3TrackMapper = new Mp3TrackMapper();
+    	List<Mp3Track> mp3Tracks = mp3TrackMapper.mapToMp3Tracks(release, releaseDate, medium);
     	
     	System.out.println(mp3CdPath);
     	System.out.println(wavCdPath);
@@ -252,41 +258,7 @@ public class App {
 		return release.media.get(number);
 	}
 
-	private static List<Mp3Track> mapToMp3Tracks(Release release, String releaseDate, Medium medium) {
-    	List<Mp3Track> tracks = new ArrayList<>();
-    	
-    	Pregap pregap = medium.pregap;
-    	boolean pregapAvailable = pregap != null;
-    	if(pregapAvailable) {
-    		if(pregap.position != 0) {
-    			System.out.println("A pregap audible track other then position 00 is currently not supported by this application.");
-    		}
-    		System.out.println("=== This CD has a hidden \"first\" track that is most probably not listed on the cover.===");
-    		Mp3Track mp3Track = new Mp3Track();
-    		
-    		boolean noArtistCredit = pregap.artistCredit.size() == 0;
-    		if(noArtistCredit) {
-    			System.out.println("The pregap does not have an artist-credit. Please correct that for the selected record in musicbrainz.org and try again.");
-    			System.exit(0);
-    		}
-    		mp3Track.isPregap = true;
-			mp3Track.artist = pregap.artistCredit.get(0).name;
-			mp3Track.releaseYear = release.date;
-			mp3Track.firstReleaseYear = releaseDate;
-			mp3Track.title = pregap.title;
-			tracks.add(mp3Track);
-    	}
-    	
-    	for(Track track : medium.tracks) {
-			Mp3Track mp3Track = new Mp3Track();
-			mp3Track.artist = release.artistCredit.get(0).name;
-			mp3Track.releaseYear = release.date;
-			mp3Track.firstReleaseYear = releaseDate;
-			mp3Track.title = track.title;
-			tracks.add(mp3Track);
-		}
-		return tracks;
-	}
+	
 	
 	private static Release promptForRelease(List<Release> releases, String text) {
 		return Prompter.askSelectFromList(releases, text, (release) -> {
@@ -327,18 +299,6 @@ public class App {
 		return releaseDate;
 	}
 
-	private static String calculateDiscIdByDevicePath(String drivePath) {
-    	DiscIdCalculator calculator = new DiscIdCalculator();
-		String discid = calculator.calculate(drivePath);
-		return discid;
-	}
-	
-	private static Optional<Disc> lookupDiscById(String discid) {
-		MusicbrainzWs2Service service = new MusicbrainzWs2Service();
-		Optional<Disc> disc = service.lookupDiscById(discid);
-		return disc;
-	}
-	
 	private static List<Release> searchReleasesByTitle(String title) {
 		MusicbrainzWs2Service service = new MusicbrainzWs2Service();
 		return service.searchReleasesByTitle(title);

@@ -6,13 +6,19 @@
  * user guide available at https://docs.gradle.org/4.4.1/userguide/tutorial_java_projects.html
  */
 
-// Apply the java plugin to add support for Java
-apply plugin: 'java'
+plugins {
 
-// Apply the application plugin to add support for building an application
-apply plugin: 'application'
+	// Apply the java plugin to add support for Java
+	id 'java'
+	
+	// Apply the application plugin to add support for building an application
+	id 'application'
+	
+	id 'eclipse'
+	
+	id 'org.openjfx.javafxplugin' version '0.0.8'
 
-apply plugin: 'eclipse'
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -37,10 +43,28 @@ dependencies {
     compile files ('libdiscid-java-wrapper/native/build')
     compile files ('libdiscid-java-wrapper/build/libs/libdiscid-java-wrapper.jar')
     
+    //Dependencies for Debian/Ubuntu openjfx
+//    compile files ('/usr/share/openjfx/lib/javafx.base.jar')
+//    compile files ('/usr/share/openjfx/lib/javafx.controls.jar')
+//    compile files ('/usr/share/openjfx/lib/javafx.fxml.jar')
+//    compile files ('/usr/share/openjfx/lib/javafx.graphics.jar')
+    
+//    compile files ('/usr/lib/x86_64-linux-gnu/jni/') //native
+    
+//	/usr/share/openjfx/lib/javafx.media.jar
+//	/usr/share/openjfx/lib/javafx.properties
+//	/usr/share/openjfx/lib/javafx.swing.jar
+//	/usr/share/openjfx/lib/javafx.web.jar
+    
     //Dependencies for Musicbrainz Service
     compile 'org.glassfish.jersey.core:jersey-client:2.29.1'
     compile 'org.glassfish.jersey.inject:jersey-hk2:2.29.1'
     compile 'org.glassfish.jersey.media:jersey-media-json-jackson:2.29.1'
+    
+    //Jersey needs Java EE which was moved out of JDK now maintained by
+    //Eclipse Foundation under the name Jakarta EE
+    runtimeOnly 'jakarta.activation:jakarta.activation-api:1.2.2'
+    runtimeOnly 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
     
     //Dependencies for Cover Art Archive
     compile 'fm.last:coverartarchive-api:2.1.1'
@@ -57,6 +81,10 @@ dependencies {
     testCompile 'org.mockito:mockito-core:2.+'
 }
 
+wrapper {
+    gradleVersion = '6.3'
+}
+
 eclipse.classpath { containers "org.springsource.ide.eclipse.gradle.classpathcontainer" }
 eclipse.classpath.file {
   withXml { xml ->
@@ -66,10 +94,17 @@ eclipse.classpath.file {
   }
 }
 
-applicationDefaultJvmArgs = ["-Djava.library.path=../lib/linux/amd64"]
+javafx {
+    version = "11.0.2"
+    modules = [ 'javafx.base','javafx.controls','javafx.fxml','javafx.graphics' ]
+}
+
+
+applicationDefaultJvmArgs = ["-Djava.library.path=../lib/linux/amd64:/usr/lib/x86_64-linux-gnu/jni/"]
 // Define the main class for the application
 //mainClassName = 'de.immerfroehlich.Main'
 mainClassName = 'App'
+//mainClassName = 'MainFX'
 
 /*
  * Execution phase configuration.

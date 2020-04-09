@@ -15,10 +15,21 @@ The build currently has only been tested on Ubuntu 18.04 LTS (Bionic Beaver) for
 The following build instruction works for the mentioned combination.
 
 To build and run it do the following:
+´´´bash
+sudo apt-get install openjdk-11-jdk gradle ant make gcc libdiscid0 libdiscid-dev cdparanoia lame imagemagick
+maybe [gradle-debian-helper openjfx libopenjfx-jni]
+´´´
 
-sudo apt-get install openjdk-8-jdk gradle ant make gcc libdiscid0 libdiscid-dev cdparanoia lame imagemagick
+Make sure that Ubuntu/Debian uses the correct java version. Run the following command and
+see if it returns an OpenJDK 11 version:
+java --version
+javac --version
 
-git clone https://github.com/immerfroehlich/audio-juicer
+If another JDK is returned then run the following command and select the OpenJDK 11 version.
+sudo update-alternatives --config java
+sudo update-alternatives --config javac 
+
+git clone --recurse-submodules -j8 https://github.com/immerfroehlich/audio-juicer
 
 cd audio-juicer
 
@@ -30,6 +41,14 @@ to be and run ./JavaJuicer in the bin directory.
 BE WARNED: Currently the tool has a few fixed configurations for the paths. Currently all ripped audio will
 be saved in ~/Musik/Archiv
 
+
+Eclipse IDE configuration
+============================
+
+2 things must (unfortunately) be done manually.
+Native-Libraries dependencies and Java 9 modules (for javafx) in run configuration.
+
+https://openjfx.io/openjfx-docs/#IDE-Eclipse
 
 Features
 ==========
@@ -95,6 +114,7 @@ imagemagick - To convert the artwork
 Alternatives
 =============
 
+Linux:
 - ripperX
 - Asunder
 - KIO-audiocd (Dolphin integration)
@@ -106,8 +126,13 @@ Alternatives
 - Flacon
 - Whipper
 - CDNfiy
+- Grip (https://sourceforge.net/projects/grip/)
 
 Source: https://www.slant.co/topics/2443/~best-cd-rippers-for-linuxs
+
+Windows:
+https://windowsreport.com/cd-ripper-software-windows-10/
+
 
 Feature Overview:
 ABCDE - Uses musicbrainz ws1 service which is out of support, currently not working
@@ -134,8 +159,7 @@ convert -resize 300x300 front.jpg front_small.jpg
 Infos:
 -----------------------
 
-JDEB - Create Debian debs of Java builds using ant:
-https://github.com/tcurdt/jdeb
+
 
 How to use Ant tasks within Gradle:
 https://docs.gradle.org/current/userguide/ant.html
@@ -170,6 +194,22 @@ https://github.com/lastfm/coverartarchive-api
 https://github.com/syntelos/cddb (this looks dirty, like CPP-Code, no unmarshalling of XML, no clearly defined API, no licence)
 
 
+Java EE is now EE4J/Jakarta EE maintained by Eclipse Foundation
+------------------------------------------------------------
+In 2018 Oracle throw out Java EE of the JDK.
+The Eclipse Foundation is now maintaining it under the name Jakarta EE / EE4J.
+See:
+https://www.heise.de/developer/meldung/Aus-Java-EE-wird-Jakarta-EE-3979348.html
+https://www.heise.de/developer/meldung/Enterprise-Java-Die-Waechter-von-Java-EE-sind-nun-die-Jakarta-EE-Botschafter-4654134.html
+https://jakartaee-ambassadors.io/2018/01/11/where-is-java-ee-going/
+
+Jakarta EE project homepage:
+https://projects.eclipse.org/projects/ee4j.jakartaee-platform
+
+How to add Jakarta EE to dependency management:
+https://medium.com/@Leejjon_net/migrate-a-jersey-based-micro-service-to-java-11-and-deploy-to-app-engine-7ba41a835992
+
+
 Debian Java packaging:
 -----------------------------------
 Debian Git Repository:
@@ -184,7 +224,24 @@ https://www.debian.org/doc/packaging-manuals/java-policy/
 Gradle Debian Helper:
 https://wiki.debian.org/Java/Packaging/Gradle
 
+Infos on how to use gradle-debian-helper:
+http://debian.2.n7.nabble.com/how-to-use-debian-gradle-helper-td4402253.html
 
+JDEB - Create Debian debs of Java builds using ant:
+https://github.com/tcurdt/jdeb
+
+
+JavaFX (openjfx) in Ubuntu:
+----------------------
+
+Installing JavaFX (openjfx) in Ubuntu:
+https://askubuntu.com/questions/1091157/javafx-missing-ubuntu-18-04
+
+OpenJFX packages in maven repository:
+https://mvnrepository.com/search?q=openjfx
+
+JavaFX with gradle plugin:
+https://kofler.info/javafx-programm-mit-gradle/
 
 
 Handling native libraries (here libdiscid)
@@ -228,6 +285,10 @@ https://stackoverflow.com/a/24257685
      
 Java Native Interface and C/C++ Tutorials:
 ------------------------------------------
+
+Generating c header files not needed anymore:
+https://stackoverflow.com/questions/28947767/javah-failing-to-create-c-header-file-for-jni-class
+
 https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaNativeInterface.html#zz-4.
 
 http://www.willemer.de/informatik/cpp/pointer.htm
@@ -305,6 +366,10 @@ https://musicbrainz.org/ws/2/release/<releaseid>/?&fmt=json
 
 Search for Release:
 https://musicbrainz.org/ws/2/release?query=Die+Bibel+Geschichten+Testament&fmt=json
+
+Submitting Date (XML also possible for JSON?):
+https://musicbrainz.org/doc/Development/XML_Web_Service/Version_2#Submitting_data
+
 
 Cover-Art:
 ----------------------
