@@ -244,6 +244,16 @@ JavaFX with gradle plugin:
 https://kofler.info/javafx-programm-mit-gradle/
 
 
+JavaFX general usage:
+-----------------------
+
+TableView example:
+https://riptutorial.com/javafx/example/7288/sample-tableview-with-2-columns
+
+JavaFX concurrency:
+https://docs.oracle.com/javafx/2/threads/jfxpub-threads.htm
+
+
 Handling native libraries (here libdiscid)
 ---------------------------------------------
 https://stackoverflow.com/questions/29437888/using-gradle-with-native-dependencies
