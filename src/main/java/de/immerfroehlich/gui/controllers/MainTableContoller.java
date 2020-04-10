@@ -10,10 +10,11 @@ import de.immerfroehlich.javajuicer.model.Mp3Track;
 import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Medium;
 import de.immerfroehlich.musicbrainz.model.Release;
-import de.immerfroehlich.musicbrainz.model.Track;
 import de.immerfroehlich.services.LibDiscIdService;
 import de.immerfroehlich.services.MusicBrainzService;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -21,6 +22,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 public class MainTableContoller implements Initializable{
 	
@@ -32,14 +34,46 @@ public class MainTableContoller implements Initializable{
 	private Button buttonMusicbrainz;
 	
 	@FXML
-	private TableView<Mp3Track> tableView;
+	private TableView<MainTableModel> tableView;
 
 	@FXML
-	private TableColumn<Mp3Track, StringProperty> trackColumn;
+	private TableColumn<MainTableModel, String> columnTrack;
+	
+	@FXML
+	private TableColumn<MainTableModel, Boolean> columnPregap;
+	
+	@FXML
+	private TableColumn<MainTableModel, String> columnArtist;
+	
+	@FXML
+	private TableColumn<MainTableModel, String> columnTitle;
+	
+	private ObservableList<MainTableModel> data = FXCollections.observableArrayList();
+	
+	private ModelMapper mapper = new ModelMapper(data);
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		buttonMusicbrainz.setOnAction(this::handleButtonMusicbrainzAction);		
+		buttonMusicbrainz.setOnAction(this::handleButtonMusicbrainzAction);
+		
+		tableView.setItems(data);
+		
+		columnTrack.setCellValueFactory( (cellDataFeature) -> {
+			return cellDataFeature.getValue().track;
+		});
+		
+		columnPregap.setCellValueFactory( (cellDataFeature) -> {
+			return cellDataFeature.getValue().pregap;
+		});
+				
+		columnArtist.setCellValueFactory( (cellDataFeature) -> {
+			return cellDataFeature.getValue().artist;
+		});
+		
+		columnTitle.setCellValueFactory( (cellDataFeature) -> {
+			return cellDataFeature.getValue().title;
+		});
+		
 	}
 	
 	protected void handleButtonMusicbrainzAction(ActionEvent event) {
@@ -71,8 +105,8 @@ public class MainTableContoller implements Initializable{
     			System.err.println("More then one medium!");
     		}
     		
-    		ObservableList<Mp3Track> tracks = mp3TrackMapper.mapToMp3Tracks(release, "1990", medium);
-    		tableView.setItems(tracks);
+    		List<Mp3Track> tracks = mp3TrackMapper.mapToMp3Tracks(release, "1990", medium);
+    		mapper.map(tracks);
     	}
 	}
 }

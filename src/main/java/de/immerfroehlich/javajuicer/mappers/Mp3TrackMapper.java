@@ -1,17 +1,18 @@
 package de.immerfroehlich.javajuicer.mappers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.immerfroehlich.javajuicer.model.Mp3Track;
 import de.immerfroehlich.musicbrainz.model.Medium;
 import de.immerfroehlich.musicbrainz.model.Pregap;
 import de.immerfroehlich.musicbrainz.model.Release;
 import de.immerfroehlich.musicbrainz.model.Track;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class Mp3TrackMapper {
 	
-	public ObservableList<Mp3Track> mapToMp3Tracks(Release release, String releaseDate, Medium medium) {
-		ObservableList<Mp3Track> tracks = FXCollections.observableArrayList();
+	public List<Mp3Track> mapToMp3Tracks(Release release, String releaseDate, Medium medium) {
+		List<Mp3Track> tracks = new ArrayList<>();
     	
     	Pregap pregap = medium.pregap;
     	boolean pregapAvailable = pregap != null;

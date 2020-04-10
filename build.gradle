@@ -40,7 +40,7 @@ dependencies {
     compile 'com.github.immerfroehlich:CommandExecutor:master-SNAPSHOT'
     compile 'com.github.academia-de-codigo:prompt-view:master-SNAPSHOT'
     
-    compile files ('libdiscid-java-wrapper/native/build')
+    runtimeOnly ('libdiscid-java-wrapper/native/build')
     compile files ('libdiscid-java-wrapper/build/libs/libdiscid-java-wrapper.jar')
     
     //Dependencies for Debian/Ubuntu openjfx
