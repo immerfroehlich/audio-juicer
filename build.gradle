@@ -103,8 +103,8 @@ javafx {
 applicationDefaultJvmArgs = ["-Djava.library.path=../lib/linux/amd64:/usr/lib/x86_64-linux-gnu/jni/"]
 // Define the main class for the application
 //mainClassName = 'de.immerfroehlich.Main'
-mainClassName = 'App'
-//mainClassName = 'MainFX'
+//mainClassName = 'App'
+mainClassName = 'MainFX'
 
 /*
  * Execution phase configuration.

@@ -62,7 +62,7 @@ Important features (sorted by priority from the most important on the top):
 - [ ] Debian package maintaining
 - [ ] For Archiving purposes Hash generation for each file and comparison (sha2)
 - [ ] For Archiving: Parallel generation of mp3 and flac
-- [ ] GUI (JavaFX or Swing)
+- [x] GUI (JavaFX or Swing)
 - [ ] User presets (just enter the command line)
 - [ ] If not available easy user upload of artist name etc to Musicbrainz (is this really needed? Musicbrainz already has a GUI on their web page, ask the user to input their CD info on their web page.)
 - [ ] (Archive database?)
@@ -75,7 +75,7 @@ TODO / Backlog
 - [ ] What about titles that are too long? Example Al Di Meola - Casino
 - [x] Selection of cdrom device
 - [ ] Remove Jitpack.io from the build and directly integrate the submodules with git and gradle
-- [ ] Migrate to an OpenJDK version that is supported by Ubuntu (currently that is OpenJDK 11)
+- [x] Migrate to an OpenJDK version that is supported by Ubuntu (currently that is OpenJDK 11)
 - [ ] Read TOC and isrc for submission of discId to musicbrainz
 - [ ] If there is only one disc for discid don't ask the user for input.
 - [ ] Show progress bar during cdparanoia ripping process
