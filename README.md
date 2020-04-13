@@ -16,7 +16,7 @@ The following build instruction works for the mentioned combination.
 
 To build and run it do the following:
 ´´´bash
-sudo apt-get install openjdk-11-jdk gradle ant make gcc libdiscid0 libdiscid-dev cdparanoia lame imagemagick
+sudo apt-get install openjdk-11-jdk gradle ant make gcc libdiscid0 libdiscid-dev cdparanoia lame imagemagick libcdio-utils
 maybe [gradle-debian-helper openjfx libopenjfx-jni]
 ´´´
 

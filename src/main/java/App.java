@@ -1,5 +1,4 @@
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +15,6 @@ import de.immerfroehlich.command.Result;
 import de.immerfroehlich.coverartarchive.CoverArtArchiveDownloader;
 import de.immerfroehlich.deviceinfo.BlockDevice;
 import de.immerfroehlich.deviceinfo.DeviceInfo;
-import de.immerfroehlich.discid.DiscIdCalculator;
 import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
 import de.immerfroehlich.javajuicer.model.Mp3Track;
 import de.immerfroehlich.javajuicer.utils.ConsolePrompt;
@@ -24,10 +22,9 @@ import de.immerfroehlich.javajuicer.utils.FATCharRemover;
 import de.immerfroehlich.musicbrainz.MusicbrainzWs2Service;
 import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Medium;
-import de.immerfroehlich.musicbrainz.model.Pregap;
 import de.immerfroehlich.musicbrainz.model.Release;
-import de.immerfroehlich.musicbrainz.model.Track;
 import de.immerfroehlich.prompt.Prompter;
+import de.immerfroehlich.services.CdParanoiaService;
 import de.immerfroehlich.services.LibDiscIdService;
 import de.immerfroehlich.services.MusicBrainzService;
 
@@ -37,6 +34,7 @@ public class App {
     	
     	LibDiscIdService libDiscIdService = new LibDiscIdService();
     	MusicBrainzService musicbrainzService = new MusicBrainzService();
+    	CdParanoiaService cdService = new CdParanoiaService();
     	
     	String deviceName = promptForDeviceName();
     	
@@ -99,7 +97,7 @@ public class App {
     	createPathWithParents(mp3CdPath);
     	createPathWithParents(wavCdPath);
     	
-    	ripWavFromStdCdromTo(wavCdPath);
+    	cdService.ripWavFromStdCdromTo(wavCdPath);
     	
     	findPregapTrack(mp3Tracks, wavCdPath);
     	
@@ -388,30 +386,6 @@ public class App {
 		}
 		trackNumber += i;
 		return trackNumber;
-	}
-
-	private static void ripWavFromStdCdromTo(String wavPath) {
-    	Command command = new Command();
-		command.setCommand("cdparanoia");
-		command.addParameter("-B");
-		command.setBasePath(wavPath);
-		
-		CommandExecutor executor = new CommandExecutor();
-		Result result = executor.execute(command);
-		
-		if(result.hasErrors()) {
-			List<String> errorRows = result.getStdErr();
-			//TODO Richtige Fehlerbehandlung.
-			for(String error : errorRows) {
-				System.out.println(error);
-			}
-		}
-		else {
-			List<String> output = result.asStringList();
-			for(String line : output) {
-				System.out.println(line);
-			}
-		}
 	}
 
 	private static void createPathWithParents(String path) {

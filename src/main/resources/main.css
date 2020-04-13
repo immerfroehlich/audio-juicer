@@ -1,4 +1,11 @@
  
-#button-musicbrainz {
-	fx-background-image: url("/home/andreas/bin/workspaces/java_projects/JavaJuicer/resources/musicbrainz.svg");	
+#buttonMusicbrainz {
+	/**-fx-background-image: url("musicbrainz-40px.png");**/
+	-fx-graphic: url("musicbrainz-40px.png");
+}
+
+.vboxImage {
+	-fx-border-color: black;
+	-fx-border-width: 2px;
+	-fx-border-style: solid;	
 }

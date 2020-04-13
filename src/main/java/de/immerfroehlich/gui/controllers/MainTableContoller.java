@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import de.immerfroehlich.coverartarchive.CoverArtService;
+import de.immerfroehlich.coverartarchive.model.Image;
 import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
 import de.immerfroehlich.javajuicer.model.Mp3Track;
 import de.immerfroehlich.musicbrainz.model.Disc;
@@ -23,11 +25,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
 
 public class MainTableContoller implements Initializable{
 	
 	LibDiscIdService libDiscIdService = new LibDiscIdService();
 	MusicBrainzService musicbrainzService = new MusicBrainzService();
+	CoverArtService coverArtService = new CoverArtService();
 	Mp3TrackMapper mp3TrackMapper = new Mp3TrackMapper();
 	
 	@FXML
@@ -47,6 +52,9 @@ public class MainTableContoller implements Initializable{
 	
 	@FXML
 	private TableColumn<MainTableModel, String> columnTitle;
+	
+	@FXML
+	private VBox vboxImages;
 	
 	private ObservableList<MainTableModel> data = FXCollections.observableArrayList();
 	
@@ -106,7 +114,16 @@ public class MainTableContoller implements Initializable{
     		}
     		
     		List<Mp3Track> tracks = mp3TrackMapper.mapToMp3Tracks(release, "1990", medium);
-    		mapper.map(tracks);
+    		mapper.map(tracks); //Binding is active!
+    		
+    		List<Image> images = coverArtService.lookupCoverArtByMbid(release.id);
+    		images.stream().forEach(e -> {
+    			String url = e.thumbnails.get("small");
+    			javafx.scene.image.Image image = new javafx.scene.image.Image(url);
+    			ImageView imageView = new ImageView(image);
+    			imageView.getStyleClass().add("vboxImage");
+    			vboxImages.getChildren().add(imageView);
+    		});
     	}
 	}
 }
