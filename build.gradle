@@ -40,7 +40,7 @@ dependencies {
     compile 'com.github.immerfroehlich:CommandExecutor:master-SNAPSHOT'
     compile 'com.github.academia-de-codigo:prompt-view:master-SNAPSHOT'
     
-    runtimeOnly files ('libdiscid-java-wrapper/native/build')
+    compile files ('libdiscid-java-wrapper/native/build') //TODO: runtimeOnly doesn't work for the native libs
     compile files ('libdiscid-java-wrapper/build/libs/libdiscid-java-wrapper.jar')
     
     //Dependencies for Debian/Ubuntu openjfx
@@ -99,8 +99,11 @@ javafx {
     modules = [ 'javafx.base','javafx.controls','javafx.fxml','javafx.graphics' ]
 }
 
+application {
+	//TODO the relative library path doesn't work with the run target!
+	applicationDefaultJvmArgs = ["-Djava.library.path=../lib/linux/amd64:/usr/lib/x86_64-linux-gnu/jni/","--module-path","/usr/share/openjfx/lib","--add-modules","javafx.base,javafx.controls,javafx.fxml,javafx.graphics"]
+}
 
-applicationDefaultJvmArgs = ["-Djava.library.path=../lib/linux/amd64:/usr/lib/x86_64-linux-gnu/jni/"]
 // Define the main class for the application
 //mainClassName = 'de.immerfroehlich.Main'
 //mainClassName = 'App'

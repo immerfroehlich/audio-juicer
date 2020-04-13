@@ -16,8 +16,8 @@ The following build instruction works for the mentioned combination.
 
 To build and run it do the following:
 ´´´bash
-sudo apt-get install openjdk-11-jdk gradle ant make gcc libdiscid0 libdiscid-dev cdparanoia lame imagemagick libcdio-utils
-maybe [gradle-debian-helper openjfx libopenjfx-jni]
+sudo apt-get install openjdk-11-jdk gradle ant make gcc libdiscid0 libdiscid-dev cdparanoia lame imagemagick libcdio-utils openjfx libopenjfx-jni
+maybe [gradle-debian-helper wget]
 ´´´
 
 Make sure that Ubuntu/Debian uses the correct java version. Run the following command and
@@ -40,6 +40,9 @@ to be and run ./JavaJuicer in the bin directory.
 
 BE WARNED: Currently the tool has a few fixed configurations for the paths. Currently all ripped audio will
 be saved in ~/Musik/Archiv
+
+Please DON'T USE the ./gradlew run target, the application will start, but the relative paths to the native libraries
+will not be correct. Just use the distribution files.
 
 
 Eclipse IDE configuration
@@ -72,10 +75,11 @@ TODO / Backlog
 ------------------------
 - [x] Pregap track (inaudible) - don't convert it to mp3. Remove the wav (Example: Genesis - Selling England..., Vangelis - Blade Runner)
 - [x] Add support for hidden audible pregap tracks (Example: Die Ärzte - 13)
-- [ ] What about titles that are too long? Example Al Di Meola - Casino
 - [x] Selection of cdrom device
-- [ ] Remove Jitpack.io from the build and directly integrate the submodules with git and gradle
 - [x] Migrate to an OpenJDK version that is supported by Ubuntu (currently that is OpenJDK 11)
+- [ ] What about titles that are too long? Example Al Di Meola - Casino
+- [ ] Remove Jitpack.io from the build and directly integrate the submodules with git and gradle
+- [ ] Remove the CoverartArchive API dependency and implement the file download myself (java or wget?) 
 - [ ] Read TOC and isrc for submission of discId to musicbrainz
 - [ ] If there is only one disc for discid don't ask the user for input.
 - [ ] Show progress bar during cdparanoia ripping process
