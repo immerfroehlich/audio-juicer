@@ -98,7 +98,7 @@
             <Button mnemonicParsing="false" text="Settings" />
         </items>
       </ToolBar>
-    <SplitPane dividerPositions="0.7438752783964365" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+    <SplitPane dividerPositions="0.7438752783964365" focusTraversable="true" prefHeight="-1.0" VBox.vgrow="ALWAYS">
       <items>
         <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="-1.0" prefWidth="-1.0">
                <content>
@@ -112,7 +112,7 @@
                   </TableView>
                </content>
         </ScrollPane>
-            <ScrollPane>
+            <ScrollPane maxWidth="-Infinity" minWidth="-Infinity" prefWidth="280.0">
                <content>
                   <VBox fx:id="vboxImages" prefHeight="200.0" prefWidth="100.0" spacing="10.0" />
                </content>
