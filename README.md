@@ -11,7 +11,8 @@ Uses: cdparanoia and lame (ffmpeg for flac?) for audio and
 imageagick for image resizing command line tools
 and lsblk for device detection (should be included in every LSB linux I guess).
 
-The build currently has only been tested on Ubuntu 18.04 LTS (Bionic Beaver) for the amd64 platform.
+The build currently has only been tested on Ubuntu 18.04 LTS (Bionic Beaver) 
+and on Debian 10 (Buster) for the amd64 platform.
 The following build instruction works for the mentioned combination.
 
 To build and run it do the following:
