@@ -99,6 +99,16 @@ Seems to be a pregap track
 - [ ] Make it compileable and runnable on Windows with MinGW
 
 
+Known Issues:
+======================
+- When using KDE, modal input Dialogs are sometimes reduced in size so that the application
+won't be useable anymore.
+As a workaround I tried to set
+dialog.setResizable(true);
+but it may be that some dialogs won't have the fix.
+The bug was fixed in some OpenJFX 12 version. Currently it seems there will be no backport to OpenJFX 11.
+See https://github.com/javafxports/openjdk-jfx/issues/222 
+
 Used libraries:
 =======================
 mp3agic - for manipulation of id3 tags
