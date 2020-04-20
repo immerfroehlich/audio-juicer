@@ -17,6 +17,7 @@ The following build instruction works for the mentioned combination.
 
 To build and run it do the following:
 sudo apt-get install git openjdk-11-jdk gradle ant make gcc libdiscid0 libdiscid-dev cdparanoia lame imagemagick libcdio-utils openjfx libopenjfx-jni
+
 maybe [gradle-debian-helper wget]
 
 Make sure that Ubuntu/Debian uses the correct java version. Run the following command and
