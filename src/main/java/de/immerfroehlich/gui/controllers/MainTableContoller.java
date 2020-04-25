@@ -7,12 +7,17 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import org.academiadecodigo.bootcamp.Prompt;
+import org.academiadecodigo.bootcamp.scanners.integer.IntegerInputScanner;
+
 import de.immerfroehlich.coverartarchive.CoverArtService;
+import de.immerfroehlich.coverartarchive.model.Image;
 import de.immerfroehlich.gui.FXUtils;
 import de.immerfroehlich.gui.InfoAlert;
 import de.immerfroehlich.gui.TextInputDialog;
-import de.immerfroehlich.gui.Tuple;
 import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
+import de.immerfroehlich.javajuicer.model.Mp3Track;
+import de.immerfroehlich.javajuicer.utils.FATCharRemover;
 import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Medium;
 import de.immerfroehlich.musicbrainz.model.Release;
@@ -28,9 +33,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 
 public class MainTableContoller implements Initializable{
@@ -131,7 +136,7 @@ public class MainTableContoller implements Initializable{
 	}
 	
 	private void doIt() {
-		Service<Tuple<Release, Medium>> service = FXUtils.createServiceTask(()-> {
+		Service<List<Mp3Track>> service = FXUtils.createServiceTask(()-> {
 //			List<Release> releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
 //			String relText = releases.stream().map(x -> x.title).collect(Collectors.joining());
 //			System.out.println(relText);
@@ -159,9 +164,36 @@ public class MainTableContoller implements Initializable{
 			//TODO Das erste Erscheinungsjahr lässt sich so nicht zuverlässig ermitteln! Wird bei Musicbrainz aber je Album angegeben.
 			//Ggf. das erste Erscheinungsjahr je Track ermitteln, z.B. bei Compilations
 			String releaseDate = promptForReleaseYear(releases, "Select first release date");
-//			Medium medium = promptForMedium(release);
+			Medium medium = promptForMedium(release);
 			
-			return new Tuple<Release, Medium>(new Release(), new Medium());
+			String rootPath = "/home/andreas/Musik/Archiv"; //TODO get the root path
+	    	String cdArtist = release.artistCredit.get(0).name;
+	    	String cdTitle = release.title;
+	    	cdArtist = FATCharRemover.removeUnallowedChars(cdArtist);
+	    	cdTitle = FATCharRemover.removeUnallowedChars(cdTitle);
+	    	
+	    	String mp3RootAlbumPath = rootPath + "/" + "mp3" + "/" + cdArtist + "/" + cdTitle;
+	    	String mp3CdPath = mp3RootAlbumPath;
+	    	String wavCdPath = rootPath + "/" + "wav" + "/" + cdArtist + "/" + cdTitle;
+	    	if(release.multiCDRelease) {
+	    		String cdPathAddon = "/CD" + medium.position;
+	    		mp3CdPath += cdPathAddon;
+	    		wavCdPath += cdPathAddon;
+	    	}
+	    	String imagePath = mp3RootAlbumPath + "/" + "images";
+	    	
+	    	//TODO I guess I need a container for all the paths.
+	    	
+	    	lookupCoverArtForRelease(release);
+	    	
+	    	List<Mp3Track> mp3Tracks = mp3TrackMapper.mapToMp3Tracks(release, releaseDate, medium);
+			
+			return mp3Tracks;
+		});
+		
+		service.setOnSucceeded((e) -> {
+			List<Mp3Track> result = service.getValue();
+			mapper.map(result);
 		});
 		
 		service.start();
@@ -189,6 +221,39 @@ public class MainTableContoller implements Initializable{
 
 	}
 	
+	private Medium promptForMedium(Release release) {
+		if(release.media.size() == 1) {
+    		return release.media.get(0);
+    	}
+    	
+    	//TODO Reuse ReleaseSelectionDialog to select the first release year.
+		
+    	int cdCount = 0;
+    	for(int i=0; i < release.media.size(); i++) {
+    		Medium media = release.media.get(i);
+			if(media.format.equals("CD")) {
+				System.out.println("[" + i + "]");
+				System.out.println(media.position);
+				System.out.println(media.trackCount);
+				
+				System.out.println("---------------");
+				
+				cdCount++;
+			}
+		}
+    	
+    	if(cdCount > 1) {
+    		release.multiCDRelease = true;
+    	}
+    	
+    	Prompt prompt = new Prompt(System.in, System.out);
+    	IntegerInputScanner scanner = new IntegerInputScanner();
+    	System.out.print("Select CD:");
+    	Integer number = prompt.getUserInput(scanner);
+    	
+		return release.media.get(number);
+	}
+
 	private String promptForReleaseYear(List<Release> releases, String text) {
 		String additionalEntry = "Or enter release year/date manually";
 		
@@ -221,19 +286,17 @@ public class MainTableContoller implements Initializable{
 		FXUtils.runAndWait(()->{
 			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");
 			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
-			fxmlLoader.setController(new ReleaseSelectionDialogController(releases));
-			VBox vbox = null;
+			ReleaseSelectionDialogController dialogController = new ReleaseSelectionDialogController(releases);
+			fxmlLoader.setController(dialogController);
 			try {
-				vbox = fxmlLoader.load();
+				fxmlLoader.load();
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(1);
 			}
 			
-			Dialog<Release> dialog = new Dialog<>();
-			dialog.setResizable(true);
-			dialog.getDialogPane().setContent(vbox);
-			Release release = dialog.showAndWait().get();
+//			Release release = dialog.showAndWait().get();
+			Release release = dialogController.showAndWait();
 			selectedRelease = release;
 		});
 		
@@ -264,45 +327,16 @@ public class MainTableContoller implements Initializable{
 
 	}
 	
-//	protected void handleButtonMusicbrainzAction(ActionEvent event) {
-//		System.out.println("Button wurde geklickt.");
-//		
-//		
-//		
-//		
-//		Optional<Disc> discOpt = musicbrainzService.lookupDiscById(discId);
-//    	List<Release> releases = null;
-//    	if(!discOpt.isPresent()) {
-//    		//TODO impl
-//    		System.err.println("Disc wasn't found.");
-//    		System.exit(0);    		
-//    	}
-//    	else {
-//    		releases = discOpt.get().releases;
-//    	}
-//    	
-//    	if(releases.size() == 1) {
-//    		Release release = releases.get(0);
-//    		
-//    		Medium medium = null;
-//    		if(release.media.size() == 1) {
-//        		medium = release.media.get(0);
-//        	}
-//    		else {
-//    			System.err.println("More then one medium!");
-//    		}
-//    		
-//    		List<Mp3Track> tracks = mp3TrackMapper.mapToMp3Tracks(release, "1990", medium);
-//    		mapper.map(tracks); //Binding is active!
-//    		
-//    		List<Image> images = coverArtService.lookupCoverArtByMbid(release.id);
-//    		images.stream().forEach(e -> {
-//    			String url = e.thumbnails.get("small");
-//    			javafx.scene.image.Image image = new javafx.scene.image.Image(url);
-//    			ImageView imageView = new ImageView(image);
-//    			imageView.getStyleClass().add("vboxImage");
-//    			vboxImages.getChildren().add(imageView);
-//    		});
-//    	}
-//	}
+	private void lookupCoverArtForRelease(Release release) {
+		List<Image> images = coverArtService.lookupCoverArtByMbid(release.id);
+		FXUtils.runAndWait(() -> {
+			images.stream().forEach(e -> {
+				String url = e.thumbnails.get("small");
+				javafx.scene.image.Image image = new javafx.scene.image.Image(url);
+				ImageView imageView = new ImageView(image);
+				imageView.getStyleClass().add("vboxImage");
+				vboxImages.getChildren().add(imageView);
+			});
+		});
+	}
 }

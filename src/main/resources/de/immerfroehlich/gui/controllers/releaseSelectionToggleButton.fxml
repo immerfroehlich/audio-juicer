@@ -35,12 +35,16 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<ToggleButton mnemonicParsing="false" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1">
+<ToggleButton maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="30.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1">
                      <graphic>
                         <VBox prefHeight="200.0" prefWidth="100.0">
                            <children>
-                              <Label text="Label" />
+                              <Label text="Label" wrapText="true">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font></Label>
                               <Label text="Label" />
                               <Label text="Label" />
                            </children>
