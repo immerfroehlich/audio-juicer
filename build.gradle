@@ -106,8 +106,8 @@ application {
 
 // Define the main class for the application
 //mainClassName = 'de.immerfroehlich.Main'
-//mainClassName = 'App'
-mainClassName = 'MainFX'
+mainClassName = 'App'
+//mainClassName = 'MainFX'
 
 /*
  * Execution phase configuration.
