@@ -19,7 +19,6 @@ import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
 import de.immerfroehlich.javajuicer.model.Mp3Track;
 import de.immerfroehlich.javajuicer.utils.ConsolePrompt;
 import de.immerfroehlich.javajuicer.utils.FATCharRemover;
-import de.immerfroehlich.musicbrainz.MusicbrainzWs2Service;
 import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Medium;
 import de.immerfroehlich.musicbrainz.model.Release;
@@ -44,7 +43,7 @@ public class App {
     	List<Release> releases;
     	if(!discOpt.isPresent()) {
     		String releaseTitle = promptForReleaseTitle();
-    		releases = searchReleasesByTitle(releaseTitle);
+    		releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
     	}
     	else {
     		releases = discOpt.get().releases;
@@ -59,7 +58,7 @@ public class App {
     	}
     	
     	Release release = promptForRelease(releases, "Select release");
-    	release = reloadRelease(release);
+    	release = musicbrainzService.reloadRelease(release);
     	//TODO Das erste Erscheinungsjahr lässt sich so nicht zuverlässig ermitteln! Wird bei Musicbrainz aber je Album angegeben.
     	//Ggf. das erste Erscheinungsjahr je Track ermitteln, z.B. bei Compilations
     	String releaseDate = promptForReleaseYear(releases, "Select first release date");
@@ -204,12 +203,6 @@ public class App {
     	}
 	}
     
-    private static Release reloadRelease(Release release) {
-    	MusicbrainzWs2Service service = new MusicbrainzWs2Service();
-		Optional<Release> disc = service.lookupReleaseById(release.id);
-		return disc.get();
-	}
-
 	private static String promptForReleaseTitle() {
 		
     	System.out.println("musicbrainz.org doesn't provide any title information for your CD. Please log in to musicbrainz.org and provide the information.");
@@ -295,11 +288,6 @@ public class App {
 		}
 		
 		return releaseDate;
-	}
-
-	private static List<Release> searchReleasesByTitle(String title) {
-		MusicbrainzWs2Service service = new MusicbrainzWs2Service();
-		return service.searchReleasesByTitle(title);
 	}
 
 	public static void createMp3OfEachWav(String wavPath, String targetPath, List<Mp3Track> tracks) {

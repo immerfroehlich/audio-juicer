@@ -1,48 +1,44 @@
 package de.immerfroehlich.gui.controllers;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import de.immerfroehlich.coverartarchive.CoverArtService;
-import de.immerfroehlich.coverartarchive.model.Image;
 import de.immerfroehlich.gui.FXUtils;
+import de.immerfroehlich.gui.InfoAlert;
+import de.immerfroehlich.gui.TextInputDialog;
 import de.immerfroehlich.gui.Tuple;
 import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
-import de.immerfroehlich.javajuicer.model.Mp3Track;
 import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Medium;
 import de.immerfroehlich.musicbrainz.model.Release;
+import de.immerfroehlich.prompt.Prompter;
 import de.immerfroehlich.services.LibDiscIdService;
 import de.immerfroehlich.services.MusicBrainzService;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 
 public class MainTableContoller implements Initializable{
 	
-	LibDiscIdService libDiscIdService = new LibDiscIdService();
-	MusicBrainzService musicbrainzService = new MusicBrainzService();
-	CoverArtService coverArtService = new CoverArtService();
-	Mp3TrackMapper mp3TrackMapper = new Mp3TrackMapper();
+	private LibDiscIdService libDiscIdService = new LibDiscIdService();
+	private MusicBrainzService musicbrainzService = new MusicBrainzService();
+	private CoverArtService coverArtService = new CoverArtService();
+	private Mp3TrackMapper mp3TrackMapper = new Mp3TrackMapper();
 	
 	@FXML
 	private Button buttonMusicbrainz;
@@ -70,7 +66,7 @@ public class MainTableContoller implements Initializable{
 	private ModelMapper mapper = new ModelMapper(data);
 	
 	//TODO get Drive path from drive selection
-	String drivePath = "/dev/sr0";
+	private String drivePath = "/dev/sr0";
 	
 	private Service<String> calculateDiscIdService = new Service<String>() {
 		@Override
@@ -105,6 +101,13 @@ public class MainTableContoller implements Initializable{
 		
 		tableView.setItems(data);
 		
+		//Workaround: The table is included in the fxml it seems it is not possible
+		//to access the fx:ids in the same controller.
+		columnTrack = (TableColumn<MainTableModel, String>) tableView.getColumns().get(0);
+		columnPregap = (TableColumn<MainTableModel, Boolean>) tableView.getColumns().get(0);
+		columnArtist = (TableColumn<MainTableModel, String>) tableView.getColumns().get(0);
+		columnTitle = (TableColumn<MainTableModel, String>) tableView.getColumns().get(0);
+		
 		columnTrack.setCellValueFactory( (cellDataFeature) -> {
 			return cellDataFeature.getValue().track;
 		});
@@ -123,56 +126,41 @@ public class MainTableContoller implements Initializable{
 		
 	}
 	
-	private String title;
 	protected void handleButtonTest(ActionEvent event) {
+		doIt();
+	}
+	
+	private void doIt() {
 		Service<Tuple<Release, Medium>> service = FXUtils.createServiceTask(()-> {
+//			List<Release> releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
+//			String relText = releases.stream().map(x -> x.title).collect(Collectors.joining());
+//			System.out.println(relText);
 			
+			String discid = libDiscIdService.calculateDiscIdByDevicePath(drivePath);
+			System.out.println("Calculated DiscId is: " + discid);
+			Optional<Disc> discOpt = musicbrainzService.lookupDiscById(discid);
+			List<Release> releases;
+			if(!discOpt.isPresent()) {
+				String releaseTitle = promptForReleaseTitle();
+				releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
+			}
+			else {
+				releases = discOpt.get().releases;
+			}
 			
-			FXUtils.runAndWait(()->{
-				ButtonType loginButtonType = new ButtonType("Login", ButtonData.OK_DONE);
-				 Dialog<String> dialog = new Dialog<>();
-				 dialog.getDialogPane().getButtonTypes().add(loginButtonType);
-				 boolean disabled = false; // computed based on content of text fields, for example
-				 dialog.getDialogPane().lookupButton(loginButtonType).setDisable(disabled);
-				 
-				 //TODO Workaround for openjfx bug 222. Remove after backport to Java 11 or update to Java 12
-				 //See https://github.com/javafxports/openjdk-jfx/issues/222
-				 dialog.setResizable(true);
-
-				 dialog.showAndWait()
-				 	.filter(response -> response.equals("OK"))
-				 	.ifPresent(response -> System.out.println("Dialog was used."));
-				 
-				 title = "test";
-			});
+			boolean noReleasesFound = releases.size() == 0; 
+			if(noReleasesFound) {
+				showNoReleaseFoundDialog();
+				return null;
+			}
 			
-//			String discid = libDiscIdService.calculateDiscIdByDevicePath(drivePath);
-//			System.out.println("Calculated DiscId is: " + discid);
-//			Optional<Disc> discOpt = musicbrainzService.lookupDiscById(discid);
-//			List<Release> releases;
-//			if(!discOpt.isPresent()) {
-//				String releaseTitle = promptForReleaseTitle();
-//				releases = searchReleasesByTitle(releaseTitle);
-//			}
-//			else {
-//				releases = discOpt.get().releases;
-//			}
-//			
-//			boolean noReleasesFound = releases.size() == 0; 
-//			if(noReleasesFound) {
-//				System.out.println("Please login to musicbrainz.org and add your CD/release.");
-//				System.out.println("Afterwards you could start this program again.");
-//				
-//				System.exit(0);
-//			}
-//			
-//			Release release = promptForRelease(releases, "Select release");
-//			release = reloadRelease(release);
-//			//TODO Das erste Erscheinungsjahr lässt sich so nicht zuverlässig ermitteln! Wird bei Musicbrainz aber je Album angegeben.
-//			//Ggf. das erste Erscheinungsjahr je Track ermitteln, z.B. bei Compilations
-//			String releaseDate = promptForReleaseYear(releases, "Select first release date");
+			Release release = promptForRelease(releases, "Select release");
+			release = musicbrainzService.reloadRelease(release);
+			//TODO Das erste Erscheinungsjahr lässt sich so nicht zuverlässig ermitteln! Wird bei Musicbrainz aber je Album angegeben.
+			//Ggf. das erste Erscheinungsjahr je Track ermitteln, z.B. bei Compilations
+			String releaseDate = promptForReleaseYear(releases, "Select first release date");
 //			Medium medium = promptForMedium(release);
-//			
+			
 			return new Tuple<Release, Medium>(new Release(), new Medium());
 		});
 		
@@ -198,8 +186,80 @@ public class MainTableContoller implements Initializable{
 //		
 //		System.out.println("4: On Thread " + Thread.currentThread().getName());
 //		System.out.println("4: Normal program flow.");
+
 	}
 	
+	private String promptForReleaseYear(List<Release> releases, String text) {
+		String additionalEntry = "Or enter release year/date manually";
+		
+		Integer number = Prompter.askSelectFromList(releases, additionalEntry, text, (release) -> {
+			String entry = "\n"
+					+ release.title + "\n" 
+					+ release.date + "\n"
+					+ release.barcode + "\n"
+					+ release.artistCredit.stream().map(x -> x.name).collect(Collectors.joining());
+			
+			return entry;
+		});
+		
+		String releaseDate;		
+		
+		boolean manuallySelected = number > (releases.size() -1);
+		if(manuallySelected) {
+			String question = "Enter release year/date";
+			releaseDate = Prompter.askForString(question);
+		}
+		else {
+			releaseDate = releases.get(number).date;
+		}
+		
+		return releaseDate;
+	}
+
+	private Release selectedRelease;
+	private Release promptForRelease(List<Release> releases, String string) {
+		FXUtils.runAndWait(()->{
+			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");
+			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
+			fxmlLoader.setController(new ReleaseSelectionDialogController(releases));
+			VBox vbox = null;
+			try {
+				vbox = fxmlLoader.load();
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
+			Dialog<Release> dialog = new Dialog<>();
+			dialog.setResizable(true);
+			dialog.getDialogPane().setContent(vbox);
+			Release release = dialog.showAndWait().get();
+			selectedRelease = release;
+		});
+		
+		return selectedRelease;
+	}
+
+	private void showNoReleaseFoundDialog() {
+		FXUtils.runAndWait(()->{
+			String text = "No Release was found for this CD.\n"
+					+ "Please login to musicbrainz.org and add your CD/release.\n"
+					+ "Afterwards you could start this program again.";
+			InfoAlert alert = new InfoAlert(text);
+			alert.showAndWait();
+		});
+	}
+	
+	String releaseTitle;
+	private String promptForReleaseTitle() {
+		FXUtils.runAndWait(()->{
+			TextInputDialog dialog = new TextInputDialog("Please enter the release title.");
+			releaseTitle = dialog.showAndWait();
+			System.out.println(releaseTitle);
+		});
+		return releaseTitle;
+	}
+
 	private void showReleaseSelectDialog() {
 
 	}
