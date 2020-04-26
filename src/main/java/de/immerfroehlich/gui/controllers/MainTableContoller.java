@@ -284,6 +284,8 @@ public class MainTableContoller implements Initializable{
 	private Release selectedRelease;
 	private Release promptForRelease(List<Release> releases, String string) {
 		FXUtils.runAndWait(()->{
+			//TODO if only one release is available select it.
+			
 			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");
 			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
 			ReleaseSelectionDialogController dialogController = new ReleaseSelectionDialogController(releases);
@@ -295,7 +297,6 @@ public class MainTableContoller implements Initializable{
 				System.exit(1);
 			}
 			
-//			Release release = dialog.showAndWait().get();
 			Release release = dialogController.showAndWait();
 			selectedRelease = release;
 		});

@@ -20,7 +20,7 @@ public class MainFX extends Application {
 			Parent root = fxmlLoader.load();
 			
 //			BorderPane root = new BorderPane();
-			Scene scene = new Scene(root,400,400);
+			Scene scene = new Scene(root,1024,786);
 			scene.getStylesheets().add(getClass().getResource("main.css").toExternalForm());
 			primaryStage.setScene(scene);
 			primaryStage.show();

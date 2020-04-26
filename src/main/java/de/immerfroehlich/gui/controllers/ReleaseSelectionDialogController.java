@@ -16,6 +16,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.layout.VBox;
 
@@ -27,10 +28,14 @@ public class ReleaseSelectionDialogController implements Initializable {
 	@FXML private ScrollPane selectionScrollPane;
 	@FXML private VBox releaseSelectionVBox;
 	@FXML private ScrollPane detailScrollPane;
+	private Dialog<Release> dialog;
+	private Button selectButton;
 	
 	private List<Release> releases;
 	
 	private Release selectedRelease;
+
+
 	
 	public ReleaseSelectionDialogController(List<Release> releases) {
 		this.releases = releases;
@@ -42,6 +47,8 @@ public class ReleaseSelectionDialogController implements Initializable {
 			ToggleButton button = createReleaseSelectionToggleButton(release);
 			releaseSelectionVBox.getChildren().add(button);
 		}
+		
+		this.dialog = createDialog();
 	}
 	
 	private ToggleButton createReleaseSelectionToggleButton(Release release) {
@@ -68,17 +75,35 @@ public class ReleaseSelectionDialogController implements Initializable {
 		label = (Label) children.get(2);
 		label.setText("Barcode: " + release.barcode);
 		
-		button.setOnAction((e) -> selectedRelease = release);
+		button.setOnAction((e) -> {
+			selectedRelease = release;
+			selectButton.setDisable(false);
+		});
 		
 		return button;
 	}
 	
 	public Release showAndWait() {
+		
+		
+		Release release = dialog.showAndWait().get();
+		return release;
+	}
+
+	private Dialog<Release> createDialog() {
 		Dialog<Release> dialog = new Dialog<>();
 		dialog.setResizable(true);
+		String text = "More then one release was found that has the same track list as your CD.\n"
+				+ "Please select the right release.\n"
+				+ "Most often the easiest way to do this is to compare the barcode numbers.\n"
+				+ "This is neccessary because the metadata and the art work can be different.";
+		dialog.setHeaderText(text);
 		dialog.getDialogPane().setContent(rootVBox);
 		ButtonType buttonTypeOne = new ButtonType("Select", ButtonData.APPLY);
 		dialog.getDialogPane().getButtonTypes().add(buttonTypeOne);
+		
+		this.selectButton = (Button) dialog.getDialogPane().lookupButton(buttonTypeOne);
+		selectButton.setDisable(true);
 		
 		dialog.setResultConverter(dialogButton -> {
 		    if (dialogButton == buttonTypeOne) {
@@ -86,9 +111,7 @@ public class ReleaseSelectionDialogController implements Initializable {
 		    }
 		    return null;
 		});
-		
-		Release release = dialog.showAndWait().get();
-		return release;
+		return dialog;
 	}
 
 }
