@@ -331,12 +331,12 @@ public class MainTableContoller implements Initializable{
 
 	private void lookupCoverArtForRelease(Release release) {
 		List<Image> images = coverArtService.lookupCoverArtByMbid(release.id);
-		FXUtils.runAndWait(() -> {
-			images.stream().forEach(e -> {
-				String url = e.thumbnails.get("small");
-				javafx.scene.image.Image image = new javafx.scene.image.Image(url);
-				ImageView imageView = new ImageView(image);
-				imageView.getStyleClass().add("vboxImage");
+		images.stream().forEach(e -> {
+			String url = e.thumbnails.get("small");
+			javafx.scene.image.Image image = new javafx.scene.image.Image(url);
+			ImageView imageView = new ImageView(image);
+			imageView.getStyleClass().add("vboxImage");
+			FXUtils.runAndWait(() -> {
 				vboxImages.getChildren().add(imageView);
 			});
 		});
