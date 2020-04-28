@@ -16,6 +16,7 @@ import de.immerfroehlich.gui.FXUtils;
 import de.immerfroehlich.gui.InfoAlert;
 import de.immerfroehlich.gui.TextInputDialog;
 import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
+import de.immerfroehlich.javajuicer.model.Configuration;
 import de.immerfroehlich.javajuicer.model.Mp3Track;
 import de.immerfroehlich.javajuicer.utils.FATCharRemover;
 import de.immerfroehlich.musicbrainz.model.Disc;
@@ -33,8 +34,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 
@@ -45,33 +49,25 @@ public class MainTableContoller implements Initializable{
 	private CoverArtService coverArtService = new CoverArtService();
 	private Mp3TrackMapper mp3TrackMapper = new Mp3TrackMapper();
 	
-	@FXML
-	private Button buttonMusicbrainz;
+	//TODO make a static access class that contains the scene and the config. 
+	private Configuration config = new Configuration();
 	
-	@FXML
-	private TableView<MainTableModel> tableView;
-
-	@FXML
-	private TableColumn<MainTableModel, String> columnTrack;
-	
-	@FXML
-	private TableColumn<MainTableModel, Boolean> columnPregap;
-	
-	@FXML
-	private TableColumn<MainTableModel, String> columnArtist;
-	
-	@FXML
-	private TableColumn<MainTableModel, String> columnTitle;
-	
-	@FXML
-	private VBox vboxImages;
+	@FXML private Button buttonMusicbrainz;
+	@FXML private TableView<MainTableModel> tableView;
+	@FXML private TableColumn<MainTableModel, String> columnTrack;
+	@FXML private TableColumn<MainTableModel, Boolean> columnPregap;
+	@FXML private TableColumn<MainTableModel, String> columnArtist;
+	@FXML private TableColumn<MainTableModel, String> columnTitle;
+	@FXML private VBox vboxImages;
+	@FXML private Label driveLabel;
+	@FXML private ChoiceBox<String> driveChoiceBox;
+	@FXML private Label pathLabel;
+	@FXML private TextField pathTextField;
 	
 	private ObservableList<MainTableModel> data = FXCollections.observableArrayList();
 	
 	private ModelMapper mapper = new ModelMapper(data);
 	
-	//TODO get Drive path from drive selection
-	private String drivePath = "/dev/sr0";
 	
 	private Service<String> calculateDiscIdService = new Service<String>() {
 		@Override
@@ -79,39 +75,28 @@ public class MainTableContoller implements Initializable{
 			return new Task<String>() {
 				@Override
 				protected String call() throws Exception {
-					return libDiscIdService.calculateDiscIdByDevicePath(drivePath);
+					return libDiscIdService.calculateDiscIdByDevicePath(config.drivePath);
 				}
 			};
 		}
 	};
 	
-//	private Service<Optional<Disc>> loadReleaseByDiscIdService = new Service<Optional<Disc>>() {
-//		@Override
-//		protected Task<Optional<Disc>> createTask() {
-//			return new Task<Optional<Disc>>() {
-//
-//				@Override
-//				protected Optional<Disc> call() throws Exception {
-//					return musicbrainzService.lookupDiscById(discId);
-//				}
-//			};
-//		}
-//	};
-
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		//buttonMusicbrainz.setOnAction(this::handleButtonMusicbrainzAction);
 		
 		buttonMusicbrainz.setOnAction(this::handleButtonTest);
+		
+		pathTextField.setText(config.rootPath);
+		pathTextField.setDisable(true);
 		
 		tableView.setItems(data);
 		
 		//Workaround: The table is included in the fxml it seems it is not possible
 		//to access the fx:ids in the same controller.
 		columnTrack = (TableColumn<MainTableModel, String>) tableView.getColumns().get(0);
-		columnPregap = (TableColumn<MainTableModel, Boolean>) tableView.getColumns().get(0);
-		columnArtist = (TableColumn<MainTableModel, String>) tableView.getColumns().get(0);
-		columnTitle = (TableColumn<MainTableModel, String>) tableView.getColumns().get(0);
+		columnPregap = (TableColumn<MainTableModel, Boolean>) tableView.getColumns().get(1);
+		columnArtist = (TableColumn<MainTableModel, String>) tableView.getColumns().get(2);
+		columnTitle = (TableColumn<MainTableModel, String>) tableView.getColumns().get(3);
 		
 		columnTrack.setCellValueFactory( (cellDataFeature) -> {
 			return cellDataFeature.getValue().track;
@@ -141,7 +126,7 @@ public class MainTableContoller implements Initializable{
 //			String relText = releases.stream().map(x -> x.title).collect(Collectors.joining());
 //			System.out.println(relText);
 			
-			String discid = libDiscIdService.calculateDiscIdByDevicePath(drivePath);
+			String discid = libDiscIdService.calculateDiscIdByDevicePath(config.drivePath);
 			System.out.println("Calculated DiscId is: " + discid);
 			Optional<Disc> discOpt = musicbrainzService.lookupDiscById(discid);
 			List<Release> releases;
@@ -163,18 +148,17 @@ public class MainTableContoller implements Initializable{
 			release = musicbrainzService.reloadRelease(release);
 			//TODO Das erste Erscheinungsjahr lässt sich so nicht zuverlässig ermitteln! Wird bei Musicbrainz aber je Album angegeben.
 			//Ggf. das erste Erscheinungsjahr je Track ermitteln, z.B. bei Compilations
-			String releaseDate = promptForReleaseYear(releases, "Select first release date");
+			String releaseDate = promptForReleaseYear(selectedRelease.title, "Select first release date");
 			Medium medium = promptForMedium(release);
 			
-			String rootPath = "/home/andreas/Musik/Archiv"; //TODO get the root path
 	    	String cdArtist = release.artistCredit.get(0).name;
 	    	String cdTitle = release.title;
 	    	cdArtist = FATCharRemover.removeUnallowedChars(cdArtist);
 	    	cdTitle = FATCharRemover.removeUnallowedChars(cdTitle);
 	    	
-	    	String mp3RootAlbumPath = rootPath + "/" + "mp3" + "/" + cdArtist + "/" + cdTitle;
+	    	String mp3RootAlbumPath = config.rootPath + "/" + "mp3" + "/" + cdArtist + "/" + cdTitle;
 	    	String mp3CdPath = mp3RootAlbumPath;
-	    	String wavCdPath = rootPath + "/" + "wav" + "/" + cdArtist + "/" + cdTitle;
+	    	String wavCdPath = config.rootPath + "/" + "wav" + "/" + cdArtist + "/" + cdTitle;
 	    	if(release.multiCDRelease) {
 	    		String cdPathAddon = "/CD" + medium.position;
 	    		mp3CdPath += cdPathAddon;
@@ -254,31 +238,52 @@ public class MainTableContoller implements Initializable{
 		return release.media.get(number);
 	}
 
-	private String promptForReleaseYear(List<Release> releases, String text) {
-		String additionalEntry = "Or enter release year/date manually";
+	private Release selectedYearRelease;
+	private String promptForReleaseYear(String releaseTitle, String text) {
+		List<Release> releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
 		
-		Integer number = Prompter.askSelectFromList(releases, additionalEntry, text, (release) -> {
-			String entry = "\n"
-					+ release.title + "\n" 
-					+ release.date + "\n"
-					+ release.barcode + "\n"
-					+ release.artistCredit.stream().map(x -> x.name).collect(Collectors.joining());
+		FXUtils.runAndWait(() -> {
+			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");
+			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
+			ReleaseSelectionDialogController dialogController = new ReleaseSelectionDialogController(releases, "artistCredit.name", "date", "media.format", "Artist:", "Date:", "Medium:");
+			fxmlLoader.setController(dialogController);
+			try {
+				fxmlLoader.load();
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
 			
-			return entry;
+			Release release = dialogController.showAndWait();
+			selectedYearRelease = release;
 		});
-		
-		String releaseDate;		
-		
-		boolean manuallySelected = number > (releases.size() -1);
-		if(manuallySelected) {
-			String question = "Enter release year/date";
-			releaseDate = Prompter.askForString(question);
-		}
-		else {
-			releaseDate = releases.get(number).date;
-		}
-		
-		return releaseDate;
+	
+		return selectedYearRelease.date;
+
+//		String additionalEntry = "Or enter release year/date manually";
+//		
+//		Integer number = Prompter.askSelectFromList(releases, additionalEntry, text, (release) -> {
+//			String entry = "\n"
+//					+ release.title + "\n" 
+//					+ release.date + "\n"
+//					+ release.barcode + "\n"
+//					+ release.artistCredit.stream().map(x -> x.name).collect(Collectors.joining());
+//			
+//			return entry;
+//		});
+//		
+//		String releaseDate;		
+//		
+//		boolean manuallySelected = number > (releases.size() -1);
+//		if(manuallySelected) {
+//			String question = "Enter release year/date";
+//			releaseDate = Prompter.askForString(question);
+//		}
+//		else {
+//			releaseDate = releases.get(number).date;
+//		}
+//		
+//		return releaseDate;
 	}
 
 	private Release selectedRelease;
@@ -288,7 +293,7 @@ public class MainTableContoller implements Initializable{
 			
 			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");
 			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
-			ReleaseSelectionDialogController dialogController = new ReleaseSelectionDialogController(releases);
+			ReleaseSelectionDialogController dialogController = new ReleaseSelectionDialogController(releases, "title", "date", "barcode", "Title:", "Date: ", "Barcode: ");
 			fxmlLoader.setController(dialogController);
 			try {
 				fxmlLoader.load();
@@ -324,10 +329,6 @@ public class MainTableContoller implements Initializable{
 		return releaseTitle;
 	}
 
-	private void showReleaseSelectDialog() {
-
-	}
-	
 	private void lookupCoverArtForRelease(Release release) {
 		List<Image> images = coverArtService.lookupCoverArtByMbid(release.id);
 		FXUtils.runAndWait(() -> {

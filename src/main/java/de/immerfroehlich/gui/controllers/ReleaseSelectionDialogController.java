@@ -5,6 +5,9 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import com.google.common.reflect.Reflection;
+
+import de.immerfroehlich.javajuicer.utils.ReflectionUtils;
 import de.immerfroehlich.musicbrainz.model.Release;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -35,9 +38,23 @@ public class ReleaseSelectionDialogController implements Initializable {
 	
 	private Release selectedRelease;
 
+	private String attributePath1;
+	private String attributePath3;
+	private String attributePath2;
+	private String label1;
+	private String label2;
+	private String label3;
 
 	
-	public ReleaseSelectionDialogController(List<Release> releases) {
+	public ReleaseSelectionDialogController(List<Release> releases, String attributePath1, String attributePath2, String attributePath3,
+			String label1, String label2, String label3) {
+		this.attributePath1 = attributePath1;
+		this.attributePath2 = attributePath2;
+		this.attributePath3 = attributePath3;
+		this.label1 = label1;
+		this.label2 = label2;
+		this.label3 = label3;
+		
 		this.releases = releases;
 	}
 
@@ -67,13 +84,21 @@ public class ReleaseSelectionDialogController implements Initializable {
 		
 		ObservableList<Node> children = vbox.getChildrenUnmodifiable();
 		Label label = (Label) children.get(0);
-		label.setText("Title: " + release.title);
+		
+		Object value1;
+		Object value2;
+		Object value3;
+		value1 = ReflectionUtils.getValueOfPath(String.class, release, this.attributePath1);
+		value2 = ReflectionUtils.getValueOfPath(String.class, release, this.attributePath2);
+		value3 = ReflectionUtils.getValueOfPath(String.class, release, this.attributePath3);
+		
+		label.setText(label1 + " " + value1);
 		
 		label = (Label) children.get(1);
-		label.setText("Release date: " + release.date);
+		label.setText(label2 + " " + value2);
 		
 		label = (Label) children.get(2);
-		label.setText("Barcode: " + release.barcode);
+		label.setText(label3 + " " + value3);
 		
 		button.setOnAction((e) -> {
 			selectedRelease = release;
