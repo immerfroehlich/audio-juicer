@@ -54,8 +54,8 @@
       <ToolBar prefHeight="40.0" prefWidth="200.0">
         <items>
           <Button id="buttonMusicbrainz" fx:id="buttonMusicbrainz" mnemonicParsing="false" text="Load Musicbrainz Infos" />
-            <Button mnemonicParsing="false" text="Create Mp3s" />
-            <Button mnemonicParsing="false" text="Settings" />
+            <Button fx:id="mp3Button" mnemonicParsing="false" text="Create Mp3s" />
+            <Button fx:id="settingsButton" mnemonicParsing="false" text="Settings" />
         </items>
       </ToolBar>
       <GridPane>

@@ -1,20 +1,23 @@
 package de.immerfroehlich.gui.controllers;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import org.academiadecodigo.bootcamp.Prompt;
 import org.academiadecodigo.bootcamp.scanners.integer.IntegerInputScanner;
 
+import de.immerfroehlich.coverartarchive.CoverArtArchiveDownloader;
 import de.immerfroehlich.coverartarchive.CoverArtService;
 import de.immerfroehlich.coverartarchive.model.Image;
 import de.immerfroehlich.gui.FXUtils;
 import de.immerfroehlich.gui.InfoAlert;
 import de.immerfroehlich.gui.TextInputDialog;
+import de.immerfroehlich.gui.YesNoDialog;
 import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
 import de.immerfroehlich.javajuicer.model.Configuration;
 import de.immerfroehlich.javajuicer.model.Mp3Track;
@@ -22,13 +25,13 @@ import de.immerfroehlich.javajuicer.utils.FATCharRemover;
 import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Medium;
 import de.immerfroehlich.musicbrainz.model.Release;
-import de.immerfroehlich.prompt.Prompter;
+import de.immerfroehlich.services.CdParanoiaService;
+import de.immerfroehlich.services.JavaJuicerService;
 import de.immerfroehlich.services.LibDiscIdService;
 import de.immerfroehlich.services.MusicBrainzService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -47,12 +50,21 @@ public class MainTableContoller implements Initializable{
 	private LibDiscIdService libDiscIdService = new LibDiscIdService();
 	private MusicBrainzService musicbrainzService = new MusicBrainzService();
 	private CoverArtService coverArtService = new CoverArtService();
+	private JavaJuicerService javaJuicerService = new JavaJuicerService();
+	private CdParanoiaService cdService = new CdParanoiaService();
 	private Mp3TrackMapper mp3TrackMapper = new Mp3TrackMapper();
 	
 	//TODO make a static access class that contains the scene and the config. 
 	private Configuration config = new Configuration();
+	private Release selectedYearRelease;
+	private Release selectedRelease;
+	private String releaseTitle;
+	private Medium medium;
+	private boolean manualCoverDialogCorrect;
 	
 	@FXML private Button buttonMusicbrainz;
+	@FXML private Button mp3Button;
+	@FXML private Button settingsButton;
 	@FXML private TableView<MainTableModel> tableView;
 	@FXML private TableColumn<MainTableModel, String> columnTrack;
 	@FXML private TableColumn<MainTableModel, Boolean> columnPregap;
@@ -69,22 +81,12 @@ public class MainTableContoller implements Initializable{
 	private ModelMapper mapper = new ModelMapper(data);
 	
 	
-	private Service<String> calculateDiscIdService = new Service<String>() {
-		@Override
-		protected Task<String> createTask() {
-			return new Task<String>() {
-				@Override
-				protected String call() throws Exception {
-					return libDiscIdService.calculateDiscIdByDevicePath(config.drivePath);
-				}
-			};
-		}
-	};
-	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		
 		buttonMusicbrainz.setOnAction(this::handleButtonTest);
+		mp3Button.setOnAction(this::createMp3s);
 		
 		pathTextField.setText(config.rootPath);
 		pathTextField.setDisable(true);
@@ -149,24 +151,12 @@ public class MainTableContoller implements Initializable{
 			//TODO Das erste Erscheinungsjahr lässt sich so nicht zuverlässig ermitteln! Wird bei Musicbrainz aber je Album angegeben.
 			//Ggf. das erste Erscheinungsjahr je Track ermitteln, z.B. bei Compilations
 			String releaseDate = promptForReleaseYear(selectedRelease.title, "Select first release date");
-			Medium medium = promptForMedium(release);
+			this.medium = promptForMedium(release);
 			
 	    	String cdArtist = release.artistCredit.get(0).name;
 	    	String cdTitle = release.title;
 	    	cdArtist = FATCharRemover.removeUnallowedChars(cdArtist);
 	    	cdTitle = FATCharRemover.removeUnallowedChars(cdTitle);
-	    	
-	    	String mp3RootAlbumPath = config.rootPath + "/" + "mp3" + "/" + cdArtist + "/" + cdTitle;
-	    	String mp3CdPath = mp3RootAlbumPath;
-	    	String wavCdPath = config.rootPath + "/" + "wav" + "/" + cdArtist + "/" + cdTitle;
-	    	if(release.multiCDRelease) {
-	    		String cdPathAddon = "/CD" + medium.position;
-	    		mp3CdPath += cdPathAddon;
-	    		wavCdPath += cdPathAddon;
-	    	}
-	    	String imagePath = mp3RootAlbumPath + "/" + "images";
-	    	
-	    	//TODO I guess I need a container for all the paths.
 	    	
 	    	lookupCoverArtForRelease(release);
 	    	
@@ -205,6 +195,78 @@ public class MainTableContoller implements Initializable{
 
 	}
 	
+	public void createMp3s(ActionEvent event) {
+		Service<Object> service = FXUtils.createServiceTask(() -> {
+			String rootPath = config.rootPath;
+			String cdArtist = selectedRelease.artistCredit.get(0).name;
+			String cdTitle = selectedRelease.title;
+			cdArtist = FATCharRemover.removeUnallowedChars(cdArtist);
+			cdTitle = FATCharRemover.removeUnallowedChars(cdTitle);
+			
+			String mp3RootAlbumPath = rootPath + "/" + "mp3" + "/" + cdArtist + "/" + cdTitle;
+			String mp3CdPath = mp3RootAlbumPath;
+			String wavCdPath = rootPath + "/" + "wav" + "/" + cdArtist + "/" + cdTitle;
+			if(selectedRelease.multiCDRelease) {
+				String cdPathAddon = "/CD" + medium.position;
+				mp3CdPath += cdPathAddon;
+				wavCdPath += cdPathAddon;
+			}
+			String imagePath = mp3RootAlbumPath + "/" + "images";
+			javaJuicerService.createPathWithParents(mp3CdPath);
+			
+			Mp3TrackMapper mp3TrackMapper = new Mp3TrackMapper();
+			String releaseDate = selectedYearRelease.date;
+			List<Mp3Track> mp3Tracks = mp3TrackMapper.mapToMp3Tracks(selectedRelease, releaseDate, medium);
+			
+			CoverArtArchiveDownloader coverArtDownloader = new CoverArtArchiveDownloader();
+			boolean frontCoverAvailable = coverArtDownloader.downloadImages(selectedRelease, imagePath);
+			frontCoverAvailable = promptForManualFrontCoverProvision(frontCoverAvailable, imagePath);
+			javaJuicerService.addFrontCoverPathTo(mp3Tracks, frontCoverAvailable, imagePath, coverArtDownloader);
+			
+			javaJuicerService.createPathWithParents(mp3CdPath);
+			javaJuicerService.createPathWithParents(wavCdPath);
+			
+			cdService.ripWavFromStdCdromTo(wavCdPath);
+			
+			findPregapTrack(mp3Tracks, wavCdPath);
+			
+			javaJuicerService.createMp3OfEachWav(wavCdPath, mp3CdPath, mp3Tracks);
+			
+			return null;
+		});
+		
+		service.start();
+	}
+	
+	private boolean promptForManualFrontCoverProvision(boolean frontCoverAvailable, String imagePath) {
+		if(frontCoverAvailable) return frontCoverAvailable;
+		
+		FXUtils.runAndWait(() -> {
+			String text = "Would you like to manually provide a full size front cover to " + imagePath + "front.jpg ?\n"
+					+ "Then copy it to the given path and type 'y' afterwards (y/n)";
+			YesNoDialog dialog = new YesNoDialog(text);
+			manualCoverDialogCorrect = dialog.showAndWait();
+		});
+		
+		if(!manualCoverDialogCorrect) return false;
+		
+		String fullPath = imagePath + "front.jpg";
+		File file = new File(fullPath);
+		if(file.exists()) return true;
+		
+		FXUtils.runAndWait(() -> {
+			String text = "The front cover at " + fullPath + " could not be found.\n"
+					+ "Would you like to correct? (y/n)";
+			YesNoDialog dialog = new YesNoDialog(text);
+			manualCoverDialogCorrect = dialog.showAndWait();
+		});
+		
+		
+		if(!manualCoverDialogCorrect) return false;
+		
+		return promptForManualFrontCoverProvision(frontCoverAvailable, imagePath);
+    }
+	
 	private Medium promptForMedium(Release release) {
 		if(release.media.size() == 1) {
     		return release.media.get(0);
@@ -238,8 +300,9 @@ public class MainTableContoller implements Initializable{
 		return release.media.get(number);
 	}
 
-	private Release selectedYearRelease;
+	
 	private String promptForReleaseYear(String releaseTitle, String text) {
+		//TODO Maybe there is another way to get the data. Musicbrainz has the so called Release Groups.
 		List<Release> releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
 		
 		FXUtils.runAndWait(() -> {
@@ -286,10 +349,12 @@ public class MainTableContoller implements Initializable{
 //		return releaseDate;
 	}
 
-	private Release selectedRelease;
 	private Release promptForRelease(List<Release> releases, String string) {
 		FXUtils.runAndWait(()->{
-			//TODO if only one release is available select it.
+			if(releases.size() == 1) {
+				selectedRelease = releases.get(0);
+				return;
+			}
 			
 			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");
 			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
@@ -319,7 +384,6 @@ public class MainTableContoller implements Initializable{
 		});
 	}
 	
-	String releaseTitle;
 	private String promptForReleaseTitle() {
 		FXUtils.runAndWait(()->{
 			TextInputDialog dialog = new TextInputDialog("Please enter the release title.");
@@ -328,7 +392,7 @@ public class MainTableContoller implements Initializable{
 		});
 		return releaseTitle;
 	}
-
+	
 	private void lookupCoverArtForRelease(Release release) {
 		List<Image> images = coverArtService.lookupCoverArtByMbid(release.id);
 		images.stream().forEach(e -> {
@@ -341,4 +405,75 @@ public class MainTableContoller implements Initializable{
 			});
 		});
 	}
+	
+	private void findPregapTrack(List<Mp3Track> mp3Tracks, String wavPath) {
+		List<File> files = javaJuicerService.listFilesOfFolder(wavPath);
+		Collections.sort(files);
+		
+    	boolean moreFilesThenTracks = files.size() > mp3Tracks.size();
+    	if(moreFilesThenTracks) {
+    		boolean oneMoreFileThenTracks = files.size() == mp3Tracks.size() + 1;
+    		if(oneMoreFileThenTracks) {
+    			boolean yes = promptForAudiblePregapTrack();
+    			if(yes) {
+    				showAddPregapToMusicbrainzInfoDialog();
+    			}
+    			else {
+    				File file = files.get(0);
+    				String filename = file.getName();
+    				yes = askToDeleteInaudiblePregapTrack(filename);
+    				if(yes) {
+    					file.delete();
+    				}
+    				else {
+    					showCurrentlyNotSupportedInfoDialog();
+    				}
+    			}
+    		}
+    		else {
+    			showMoreThenOnePregapTrackInfoDialog();
+    		}
+    	}
+	}
+
+	private void showMoreThenOnePregapTrackInfoDialog() {
+		String text = "There are more tracks on the CD than are listed on musicbrainz.org.\r\n"
+				+ "Probably the information on musicbrainz.org is not correct. If this is the case, please\r\n"
+				+ "correct it."
+				+ "Otherwise the CD contains multiple hidden tracks. Which is currently not supported by this application.";
+		InfoAlert alert = new InfoAlert(text);
+		alert.showAndWait();
+		System.exit(0);
+	}
+
+	private void showCurrentlyNotSupportedInfoDialog() {
+		String text = "This is currently not supported by this application.";
+		InfoAlert alert = new InfoAlert(text);
+		alert.showAndWait();
+		System.exit(0);
+	}
+
+	private boolean askToDeleteInaudiblePregapTrack(String filename) {
+		String text = "If " + filename + " is the pregap track it will be deleted and the application tries to continue.\n"
+			+ "Is " + filename + " the inaudible pregap track?";
+		YesNoDialog dialog = new YesNoDialog(text);
+		return dialog.showAndWait();
+	}
+
+	private void showAddPregapToMusicbrainzInfoDialog() {
+		String text = "Please add the track to the selected release on musicbrainz.org as track 00 and start again.";
+		InfoAlert alert = new InfoAlert(text);
+		alert.showAndWait();
+	}
+
+	private boolean promptForAudiblePregapTrack() {
+		String text = "A track was found that is not listed on musicbrainz.org.\r\n”"
+				+ "Most propably this is a inaudible pregap track that was used in the past to calibrate\r\n"
+				+ "old CD Players.\r\n"
+				+ "But it could be a hidden track that is audible but not listed on the cover.\r\n"
+				+ "Please listen to the WAV files and decide.\r\n\r\n";
+		YesNoDialog dialog = new YesNoDialog(text);
+		return dialog.showAndWait();
+	}
+	
 }
