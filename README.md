@@ -271,6 +271,9 @@ https://riptutorial.com/javafx/example/7288/sample-tableview-with-2-columns
 JavaFX concurrency:
 https://docs.oracle.com/javafx/2/threads/jfxpub-threads.htm
 
+Progress Bar Binding:
+https://stackoverflow.com/questions/36333902/binding-progress-bar-to-a-service-in-javafx
+
 
 Handling native libraries (here libdiscid)
 ---------------------------------------------

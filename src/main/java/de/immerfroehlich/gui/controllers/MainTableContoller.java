@@ -85,7 +85,7 @@ public class MainTableContoller implements Initializable{
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		
-		buttonMusicbrainz.setOnAction(this::handleButtonTest);
+		buttonMusicbrainz.setOnAction(this::loadMusicBrainzInfos);
 		mp3Button.setOnAction(this::createMp3s);
 		
 		pathTextField.setText(config.rootPath);
@@ -118,11 +118,7 @@ public class MainTableContoller implements Initializable{
 		
 	}
 	
-	protected void handleButtonTest(ActionEvent event) {
-		doIt();
-	}
-	
-	private void doIt() {
+	private void loadMusicBrainzInfos(ActionEvent event) {
 		Service<List<Mp3Track>> service = FXUtils.createServiceTask(()-> {
 //			List<Release> releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
 //			String relText = releases.stream().map(x -> x.title).collect(Collectors.joining());
@@ -394,6 +390,10 @@ public class MainTableContoller implements Initializable{
 	}
 	
 	private void lookupCoverArtForRelease(Release release) {
+		FXUtils.runAndWait(() -> {
+			vboxImages.getChildren().clear();
+		});
+		
 		List<Image> images = coverArtService.lookupCoverArtByMbid(release.id);
 		images.stream().forEach(e -> {
 			String url = e.thumbnails.get("small");
