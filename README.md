@@ -33,10 +33,6 @@ git clone --recurse-submodules -j8 https://github.com/immerfroehlich/audio-juice
 
 cd audio-juicer
 
-Then checkout tag V0.8 which is a working command line version. The main branch will be a GUI version from now on. 
-
-git checkout tags/V0.8
-
 ./gradlew build
 
 Extract the content of build/distributions/JavaJuicer.zip to where you want the compiled application
