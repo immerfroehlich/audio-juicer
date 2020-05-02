@@ -27,7 +27,7 @@ public class YesNoDialog {
 		alert.setContentText(text);
 
 		ButtonType buttonTypeOne = new ButtonType("Yes", ButtonData.YES);
-		ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.NO);
+		ButtonType buttonTypeCancel = new ButtonType("No", ButtonData.NO);
 
 		alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeCancel);
 

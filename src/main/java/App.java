@@ -103,7 +103,8 @@ public class App {
     	
     	findPregapTrack(mp3Tracks, wavCdPath);
     	
-    	javaJuicerService.createMp3OfEachWav(wavCdPath, mp3CdPath, mp3Tracks);
+    	Runnable doNothingCallback = () -> {};
+    	javaJuicerService.createMp3OfEachWav(wavCdPath, mp3CdPath, mp3Tracks, doNothingCallback);
     	
     }
 

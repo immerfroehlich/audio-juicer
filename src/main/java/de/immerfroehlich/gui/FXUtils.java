@@ -4,10 +4,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiConsumer;
 
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 
 public class FXUtils {
 
@@ -77,18 +79,21 @@ public class FXUtils {
 		}
 	}
 	
-	public static <R> Service<R> createServiceTask(ExceptionThrowingSupplier<R> task) {
+	public static <R> Service<R> createService(Task<R> task, BiConsumer<WorkerStateEvent, Service<R>> onSuccededCallback) {
 		Service<R> service = new Service<R>() {
 			@Override
 			protected Task<R> createTask() {
-				return new Task<R>() {
-					@Override
-					protected R call() throws Exception {
-						return task.get();
-					}
-				};
+				return task;
 			}
 		};
+		
+		ApplicationContext.bindProgressPropertyToProgressBar(service.progressProperty());
+		ApplicationContext.showProgressOverlay();
+		
+		service.setOnSucceeded((e) -> {
+			onSuccededCallback.accept(e, service);
+			ApplicationContext.hideProgressOverlay();
+		});
 	
 		return service;
 	}

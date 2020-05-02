@@ -8,7 +8,7 @@ Build
 ========
 
 Uses: cdparanoia and lame (ffmpeg for flac?) for audio and
-imageagick for image resizing command line tools
+imagemagick for image resizing command line tools
 and lsblk for device detection (should be included in every LSB linux I guess).
 
 The build currently has only been tested on Ubuntu 18.04 LTS (Bionic Beaver) 
@@ -84,12 +84,20 @@ TODO / Backlog
 - [ ] What about titles that are too long? Example Al Di Meola - Casino
 - [ ] Remove Jitpack.io from the build and directly integrate the submodules with git and gradle
 - [ ] Remove the CoverartArchive API dependency and implement the file download myself (java or wget?) 
-- [ ] Read TOC and isrc for submission of discId to musicbrainz
-- [ ] If there is only one disc for discid don't ask the user for input.
-- [ ] Show progress bar during cdparanoia ripping process
+- [x] Read TOC and isrc for submission of discId to musicbrainz
+- [ ] Upload TOC and ISRC to musicbrainz for unknown releases
+- [x] If there is only one disc for discid don't ask the user for input.
+- Progress Bar
+	- [x] Show progress bar during cdparanoia ripping process
+	- [ ] Rip every track on it's own so an accurate progress bar can be shown.
+	- [ ] Pimping the progress bar. Show the current work (converting track 1/15). I guess this also means to have a Task for each work?
 - [ ] Logging for debug and info and error
 - [ ] Verbose mode with logging info
-- [ ] The first release year must be searched by a special query and not via discid. Often the first release has been a vinyl/Schellack record
+- [x] The first release year must be searched by a special query and not via discid. Often the first release has been a vinyl/Schellack record
+	- [x] Now the CD title is used as a query.
+	- [ ] Add manual input of first release year.
+	- [ ] Currently not all releases for a CD title will be retrieved. See Gustav Holst - The Planets which doesn't find the 1981 first release for the record.
+	- [ ] Maybe use the Release Group from musicbrainz to get the first release year. But I don't know if the data quality is good enough. 
 - [ ] Blade Runner throws IndexOutOfBoundsException
 java.lang.IndexOutOfBoundsException: Index: 12, Size: 12
 	at java.util.ArrayList.rangeCheck(ArrayList.java:653)
@@ -101,6 +109,13 @@ Seems to be a pregap track
 - [ ] Adding Strings to resource loader
 - [ ] Localization
 - [ ] Make it compileable and runnable on Windows with MinGW
+- [ ] Find and use an alternative to cdparanoia as it is sometimes very slow and I don't know if it's worth the accuracy
+- [ ] Always use the tracks artist, try it with a compilation CD e.g. Bravo Hits. For Gustav Holst the Planets the artist name is simply just Holst. Ask the editor.
+- [ ] Implement settings dialog with at least the root/ripping path as a first setting and save it to the users home path.
+- [ ] Implement drive selection combobox. Use /dev/cdrom as the standard.
+- [ ] Get away from the questions tirade for missing artwork and implement it the GUI way - which means graphically show that no artwork was found.
+	And add a button to manually select artwork.
+- [ ] ?Show an info dialog on first start explaining that this is a frontend to Musicbrainz for ripping. And if any data is not OK, go to musicbrainz and correct it.
 
 
 Known Issues:

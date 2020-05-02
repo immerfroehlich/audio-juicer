@@ -24,7 +24,7 @@ public class JavaJuicerService {
 		executor.execute(command);
 	}
 	
-	public void createMp3OfEachWav(String wavPath, String targetPath, List<Mp3Track> tracks) {
+	public void createMp3OfEachWav(String wavPath, String targetPath, List<Mp3Track> tracks, Runnable trackfinishedCallback) {
     	List<File> files = listFilesOfFolder(wavPath);
     	Collections.sort(files);
     	
@@ -45,6 +45,7 @@ public class JavaJuicerService {
     		String fullQualifiedOuputFile = targetPath + "/" + outputFile;
     		
     		Result result = createMp3Of(fullQualifiedInputFile, fullQualifiedOuputFile, track, trackNumber);
+    		trackfinishedCallback.run();
     		
     		if(result.hasErrors()) {
     			for(String line : result.getStdErr()) {
