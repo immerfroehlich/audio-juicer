@@ -93,7 +93,11 @@ public class MainTableContoller implements Initializable{
 		mp3Button.setOnAction(this::createMp3s);
 		
 		pathTextField.setText(config.rootPath);
-		pathTextField.setDisable(true);
+		pathTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+			config.rootPath = pathTextField.getText();
+		});
+		pathTextField.setOnAction((e) -> {
+		});
 		
 		tableView.setItems(data);
 		
