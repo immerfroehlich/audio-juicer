@@ -19,6 +19,7 @@ import de.immerfroehlich.gui.FXUtils;
 import de.immerfroehlich.gui.InfoAlert;
 import de.immerfroehlich.gui.TextInputDialog;
 import de.immerfroehlich.gui.YesNoDialog;
+import de.immerfroehlich.gui.controls.MasterDetailProgressBarDialog;
 import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
 import de.immerfroehlich.javajuicer.model.Configuration;
 import de.immerfroehlich.javajuicer.model.Mp3Track;
@@ -64,7 +65,6 @@ public class MainTableContoller implements Initializable{
 	private String releaseTitle;
 	private Medium medium;
 	private boolean manualCoverDialogCorrect;
-	private int currentFinishedTrack = 0;
 	
 	@FXML private Button buttonMusicbrainz;
 	@FXML private Button mp3Button;
@@ -83,6 +83,7 @@ public class MainTableContoller implements Initializable{
 	private ObservableList<MainTableModel> data = FXCollections.observableArrayList();
 	
 	private ModelMapper mapper = new ModelMapper(data);
+	private MasterDetailProgressBarDialog progressBarDialog;
 	
 	
 	@SuppressWarnings("unchecked")
@@ -124,6 +125,7 @@ public class MainTableContoller implements Initializable{
 			return cellDataFeature.getValue().title;
 		});
 		
+		this.progressBarDialog = new MasterDetailProgressBarDialog();
 	}
 	
 	private void loadMusicBrainzInfos(ActionEvent event) {
@@ -180,8 +182,6 @@ public class MainTableContoller implements Initializable{
 		Service<List<Mp3Track>> service = FXUtils.createService(task, onSucceededCallback);
 		service.start();
 		
-
-		
 //		calculateDiscIdService = FXUtils.createServiceTask( () -> {
 //			System.out.println("1: On Thread " + Thread.currentThread().getName());
 //			System.out.println("1: sleep 3000");
@@ -211,6 +211,14 @@ public class MainTableContoller implements Initializable{
 		Task<Object> task = new Task<Object>() {
 			@Override
 			protected Object call() throws Exception {
+				FXUtils.runAndWait(() -> {
+					progressBarDialog.setMasterText("Downloading Images");
+					progressBarDialog.setDetailText("Downloading Images");
+					progressBarDialog.setMasterTaskNumber(3);
+					progressBarDialog.setDetailTaskNumber(1);
+					progressBarDialog.init();
+				});
+				
 				String rootPath = config.rootPath;
 				String cdArtist = selectedRelease.artistCredit.get(0).name;
 				String cdTitle = selectedRelease.title;
@@ -240,14 +248,38 @@ public class MainTableContoller implements Initializable{
 				javaJuicerService.createPathWithParents(mp3CdPath);
 				javaJuicerService.createPathWithParents(wavCdPath);
 				
+				FXUtils.runAndWait(() -> {
+					progressBarDialog.masterTaskFinished();
+					progressBarDialog.setMasterText("Ripping CD");
+					progressBarDialog.setDetailText("Ripping CD");
+					progressBarDialog.setDetailTaskNumber(1);
+					progressBarDialog.init();
+				});
+				
 				cdService.ripWavFromStdCdromTo(wavCdPath);
 				
-				findPregapTrack(mp3Tracks, wavCdPath);
+				FXUtils.runAndWait(() -> {
+					progressBarDialog.masterTaskFinished();
+					progressBarDialog.setMasterText("Ripping CD");
+					progressBarDialog.setDetailText("Ripping CD");
+					progressBarDialog.setDetailTaskNumber(1);
+					progressBarDialog.init();
+				});				
 				
-				currentFinishedTrack = 0;
+				findPregapTrack(mp3Tracks, wavCdPath);
+
+				FXUtils.runAndWait(() -> {
+					progressBarDialog.masterTaskFinished();
+					progressBarDialog.setMasterText("Creating MP3s");
+					progressBarDialog.setDetailText("Converting Track to MP3");
+					progressBarDialog.setDetailTaskNumber(mp3Tracks.size());
+					progressBarDialog.init();
+				});				
+				
 				Runnable calculateProgressBar = () -> {
-					currentFinishedTrack++;
-					updateProgress(currentFinishedTrack, mp3Tracks.size());
+		    		FXUtils.runAndWait(() -> {
+		    			progressBarDialog.detailTaskFinished();
+		    		});
 				};
 				javaJuicerService.createMp3OfEachWav(wavCdPath, mp3CdPath, mp3Tracks, calculateProgressBar);
 				
@@ -258,6 +290,7 @@ public class MainTableContoller implements Initializable{
 		Service<Object> service = FXUtils.createService(task, (e,s) -> {});
 		service.start();
 		
+		progressBarDialog.show();		
 	}
 	
 	private boolean promptForManualFrontCoverProvision(boolean frontCoverAvailable, String imagePath) {

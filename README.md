@@ -86,7 +86,7 @@ TODO / Backlog
 - Progress Bar
 	- [x] Show progress bar during cdparanoia ripping process
 	- [ ] Rip every track on it's own so an accurate progress bar can be shown.
-	- [ ] Pimping the progress bar. Show the current work (converting track 1/15). I guess this also means to have a Task for each work?
+	- [x] Pimping the progress bar. Show the current work (converting track 1/15). I guess this also means to have a Task for each work?
 - [ ] Logging for debug and info and error
 - [ ] Verbose mode with logging info
 - [x] The first release year must be searched by a special query and not via discid. Often the first release has been a vinyl/Schellack record
@@ -112,6 +112,8 @@ Seems to be a pregap track
 - [ ] Get away from the questions tirade for missing artwork and implement it the GUI way - which means graphically show that no artwork was found.
 	And add a button to manually select artwork.
 - [ ] ?Show an info dialog on first start explaining that this is a frontend to Musicbrainz for ripping. And if any data is not OK, go to musicbrainz and correct it.
+- [ ] Bug: Progress bar doesn't disappear after work is finished. No finish dialog.
+- [ ] Bug: The dialogs are missing action description that is given in command line. 
 
 
 Known Issues:

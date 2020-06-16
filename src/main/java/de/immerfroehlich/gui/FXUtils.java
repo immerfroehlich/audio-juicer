@@ -93,6 +93,7 @@ public class FXUtils {
 		service.setOnSucceeded((e) -> {
 			onSuccededCallback.accept(e, service);
 			ApplicationContext.hideProgressOverlay();
+			ApplicationContext.resetProgressBar();
 		});
 	
 		return service;
