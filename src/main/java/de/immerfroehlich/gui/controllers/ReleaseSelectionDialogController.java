@@ -44,6 +44,8 @@ public class ReleaseSelectionDialogController implements Initializable {
 	private String label1;
 	private String label2;
 	private String label3;
+	
+	private String text = null;
 
 	
 	public ReleaseSelectionDialogController(List<Release> releases, String attributePath1, String attributePath2, String attributePath3,
@@ -109,19 +111,22 @@ public class ReleaseSelectionDialogController implements Initializable {
 	}
 	
 	public Release showAndWait() {
-		
-		
 		Release release = dialog.showAndWait().get();
 		return release;
+	}
+	
+	public void setText(String text) {
+		this.text = text;
 	}
 
 	private Dialog<Release> createDialog() {
 		Dialog<Release> dialog = new Dialog<>();
 		dialog.setResizable(true);
-		String text = "More then one release was found that has the same track list as your CD.\n"
-				+ "Please select the right release.\n"
-				+ "Most often the easiest way to do this is to compare the barcode numbers.\n"
-				+ "This is neccessary because the metadata and the art work can be different.";
+		
+		if(text == null) {
+			throw new IllegalStateException("You have to call setText before initialization first.");
+		}
+		
 		dialog.setHeaderText(text);
 		dialog.getDialogPane().setContent(rootVBox);
 		ButtonType buttonTypeOne = new ButtonType("Select", ButtonData.APPLY);

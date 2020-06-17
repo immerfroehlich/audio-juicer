@@ -329,7 +329,6 @@ public class MainTableContoller implements Initializable{
     	
     	//TODO Reuse ReleaseSelectionDialog to select the first release year.
 		
-    	int cdCount = 0;
     	for(int i=0; i < release.media.size(); i++) {
     		Medium media = release.media.get(i);
 			if(media.format.equals("CD")) {
@@ -338,12 +337,10 @@ public class MainTableContoller implements Initializable{
 				System.out.println(media.trackCount);
 				
 				System.out.println("---------------");
-				
-				cdCount++;
 			}
 		}
     	
-    	if(cdCount > 1) {
+    	if(release.media.size() > 1) {
     		release.multiCDRelease = true;
     	}
     	
@@ -364,6 +361,8 @@ public class MainTableContoller implements Initializable{
 			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");
 			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
 			ReleaseSelectionDialogController dialogController = new ReleaseSelectionDialogController(releases, "artistCredit.name", "date", "media.format", "Artist:", "Date:", "Medium:");
+			dialogController.setText("Select first release date");
+			
 			fxmlLoader.setController(dialogController);
 			try {
 				fxmlLoader.load();
@@ -414,6 +413,11 @@ public class MainTableContoller implements Initializable{
 			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");
 			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
 			ReleaseSelectionDialogController dialogController = new ReleaseSelectionDialogController(releases, "title", "date", "barcode", "Title:", "Date: ", "Barcode: ");
+			String text = "More then one release was found that has the same track list as your CD.\n"
+					+ "Please select the right release.\n"
+					+ "Most often the easiest way to do this is to compare the barcode numbers.\n"
+					+ "This is neccessary because the metadata and the artwork can be different.";
+			dialogController.setText(text);
 			fxmlLoader.setController(dialogController);
 			try {
 				fxmlLoader.load();
