@@ -44,6 +44,8 @@ be saved in ~/Musik/Archiv
 Please DON'T USE the ./gradlew run target, the application will start, but the relative paths to the native libraries
 will not be correct. Just use the distribution files.
 
+From time to time call "git pull" to get the latest changes and then rebuild the project with "./gradlew build".
+
 
 Eclipse IDE configuration
 ============================
