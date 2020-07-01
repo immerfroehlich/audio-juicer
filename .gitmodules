@@ -1,3 +1,6 @@
 [submodule "libdiscid-java-wrapper"]
 	path = libdiscid-java-wrapper
 	url = https://github.com/immerfroehlich/libdiscid-java-wrapper
+[submodule "CommandExecutor"]
+	path = CommandExecutor
+	url = https://github.com/immerfroehlich/CommandExecutor

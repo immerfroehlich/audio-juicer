@@ -35,8 +35,8 @@ cd audio-juicer
 
 ./gradlew build
 
-Extract the content of build/distributions/JavaJuicer.zip to where you want the compiled application
-to be and run ./JavaJuicer in the bin directory.
+Extract the content of java-juicer/build/distributions/JavaJuicer.zip to where you want the compiled application
+to be and run ./java-juicer in the bin directory.
 
 BE WARNED: Currently the tool has a few fixed configurations for the paths. Currently all ripped audio will
 be saved in ~/Musik/Archiv
@@ -49,6 +49,13 @@ From time to time call "git pull" to get the latest changes and then rebuild the
 
 Eclipse IDE configuration
 ============================
+
+Call
+
+./gradlew eclipse
+
+to create the needed eclipse files. Then import the project via File->Import -> General->Existing Projects into Workspace. Click on Options->search for nested project then
+select all nested projects. Click OK.
 
 2 things must (unfortunately) be done manually.
 Native-Libraries dependencies and Java 9 modules (for javafx) in run configuration.
@@ -80,7 +87,7 @@ TODO / Backlog
 - [x] Selection of cdrom device
 - [x] Migrate to an OpenJDK version that is supported by Ubuntu (currently that is OpenJDK 11)
 - [ ] What about titles that are too long? Example Al Di Meola - Casino
-- [ ] Remove Jitpack.io from the build and directly integrate the submodules with git and gradle
+- [x] Remove Jitpack.io from the build and directly integrate the submodules with git and gradle
 - [ ] Remove the CoverartArchive API dependency and implement the file download myself (java or wget?) 
 - [x] Read TOC and isrc for submission of discId to musicbrainz
 - [ ] Upload TOC and ISRC to musicbrainz for unknown releases

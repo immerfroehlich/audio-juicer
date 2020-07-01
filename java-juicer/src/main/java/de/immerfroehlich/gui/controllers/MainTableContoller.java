@@ -9,9 +9,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
 
-import org.academiadecodigo.bootcamp.Prompt;
-import org.academiadecodigo.bootcamp.scanners.integer.IntegerInputScanner;
-
 import de.immerfroehlich.coverartarchive.CoverArtArchiveDownloader;
 import de.immerfroehlich.coverartarchive.CoverArtService;
 import de.immerfroehlich.coverartarchive.model.Image;
@@ -344,10 +341,15 @@ public class MainTableContoller implements Initializable{
     		release.multiCDRelease = true;
     	}
     	
-    	Prompt prompt = new Prompt(System.in, System.out);
-    	IntegerInputScanner scanner = new IntegerInputScanner();
-    	System.out.print("Select CD:");
-    	Integer number = prompt.getUserInput(scanner);
+//    	Prompt prompt = new Prompt(System.in, System.out);
+//    	IntegerInputScanner scanner = new IntegerInputScanner();
+//    	System.out.print("Select CD:");
+//    	Integer number = prompt.getUserInput(scanner);
+    	
+    	System.err.println("Multi-CD releases currently not supported.");
+    	System.exit(1);
+    	
+    	int number = 0;//TODO: temp.
     	
 		return release.media.get(number);
 	}

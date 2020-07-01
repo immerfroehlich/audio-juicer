@@ -7,3 +7,13 @@ build
 libs
 native
 *.log
+
+java-juicer/.gradle
+java-juicer/.settings
+java-juicer/.classpath
+java-juicer/.project
+java-juicer/bin
+java-juicer/build
+java-juicer/libs
+java-juicer/native
+java-juicer/*.log
