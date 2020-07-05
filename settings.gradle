@@ -17,5 +17,4 @@ include 'services:webservice'
 
 rootProject.name = 'JavaJuicer'
 
-include 'CommandExecutor'
 include 'java-juicer'
