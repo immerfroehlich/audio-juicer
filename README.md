@@ -35,16 +35,16 @@ cd audio-juicer
 
 ./gradlew build
 
-Extract the content of java-juicer/build/distributions/JavaJuicer.zip to where you want the compiled application
-to be and run ./java-juicer in the bin directory.
-
-BE WARNED: Currently the tool has a few fixed configurations for the paths. Currently all ripped audio will
-be saved in ~/Musik/Archiv
+Call
+./run.sh
+to run the application
 
 Please DON'T USE the ./gradlew run target, the application will start, but the relative paths to the native libraries
 will not be correct. Just use the distribution files.
 
-From time to time call "git pull" to get the latest changes and then rebuild the project with "./gradlew build".
+From time to time call
+git pull --recurse-submodules
+to get the latest changes and then rebuild the project with "./gradlew build".
 
 
 Eclipse IDE configuration
