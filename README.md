@@ -62,6 +62,9 @@ Native-Libraries dependencies and Java 9 modules (for javafx) in run configurati
 
 https://openjfx.io/openjfx-docs/#IDE-Eclipse
 
+Here is an example configuration for VM-Arguments of the Application configuration (Run->Run Configurations):
+--add-modules javafx.base,javafx.controls,javafx.fxml,javafx.graphics --module-path /home/andreas/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-fxml/11.0.2/1b8a331d5f393b48de0aef59b3c967a312967290/javafx-fxml-11.0.2-linux.jar:/home/andreas/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-controls/11.0.2/5f6929050a744aab39ebfc1e8e5dd03bcd2ad47b/javafx-controls-11.0.2-linux.jar:/home/andreas/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-graphics/11.0.2/ef4c34f0ca77cd99100b76c2ccf1dce383572bb1/javafx-graphics-11.0.2-linux.jar:/home/andreas/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-base/11.0.2/8db178adb1085d455e5ef643a48c34959c8771c1/javafx-base-11.0.2-linux.jar -Djava.library.path=libdiscid-java-wrapper/native/build/linux/amd64
+
 Features
 ==========
 
@@ -82,6 +85,9 @@ Important features (sorted by priority from the most important on the top):
 
 TODO / Backlog
 ------------------------
+- [ ] Bug: Progress bar doesn't disappear after work is finished. No finish dialog.
+- [ ] Add support for Multi-CD releases. Ask the user to select the right CD. (Is automation possible?)
+- [ ] The pregap track dialog is not asking any question, but the answers are yes and no. Add the question. After clicking yes the process doesn't stop - Fix it.
 - [x] Pregap track (inaudible) - don't convert it to mp3. Remove the wav (Example: Genesis - Selling England..., Vangelis - Blade Runner)
 - [x] Add support for hidden audible pregap tracks (Example: Die Ärzte - 13)
 - [x] Selection of cdrom device
@@ -92,6 +98,8 @@ TODO / Backlog
 - [x] Read TOC and isrc for submission of discId to musicbrainz
 - [ ] Upload TOC and ISRC to musicbrainz for unknown releases
 - [x] If there is only one disc for discid don't ask the user for input.
+- Ripping
+	- [ ] cdparanoia is extremely slow. Either make it faster by disabling paranoia mode or find an alternative to it.
 - Progress Bar
 	- [x] Show progress bar during cdparanoia ripping process
 	- [ ] Rip every track on it's own so an accurate progress bar can be shown.
@@ -114,14 +122,12 @@ Seems to be a pregap track
 - [ ] Adding Strings to resource loader
 - [ ] Localization
 - [ ] Make it compileable and runnable on Windows with MinGW
-- [ ] Find and use an alternative to cdparanoia as it is sometimes very slow and I don't know if it's worth the accuracy
 - [ ] Always use the tracks artist, try it with a compilation CD e.g. Bravo Hits. For Gustav Holst the Planets the artist name is simply just Holst. Ask the editor.
-- [ ] Implement settings dialog with at least the root/ripping path as a first setting and save it to the users home path.
-- [ ] Implement drive selection combobox. Use /dev/cdrom as the standard.
+- [x] Implement settings dialog with at least the root/ripping path as a first setting and save it to the users home path.
+- [x] Implement drive selection combobox. Use /dev/cdrom as the standard. [Note: cdrom is not found by lsblk, therefore not used.]
 - [ ] Get away from the questions tirade for missing artwork and implement it the GUI way - which means graphically show that no artwork was found.
 	And add a button to manually select artwork.
 - [ ] ?Show an info dialog on first start explaining that this is a frontend to Musicbrainz for ripping. And if any data is not OK, go to musicbrainz and correct it.
-- [ ] Bug: Progress bar doesn't disappear after work is finished. No finish dialog.
 - [ ] Bug: The dialogs are missing action description that is given in command line. 
 
 
@@ -145,7 +151,7 @@ coverartarchive-api - For image download from Cover Art Archive
 URL: https://github.com/lastfm/coverartarchive-api
 Licence: Apache 2.0
 
-lsblk --json --output name,type
+lsblk --json --output name,type -a
 Outputs all bulk devices as json
 
 imagemagick - To convert the artwork

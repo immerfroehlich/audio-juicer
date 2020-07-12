@@ -2,6 +2,7 @@ import java.net.URL;
 
 import de.immerfroehlich.gui.ApplicationContext;
 import de.immerfroehlich.gui.controllers.MainTableContoller;
+import de.immerfroehlich.services.ConfigurationService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -17,6 +18,10 @@ public class MainFX extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
+			ConfigurationService confService = new ConfigurationService();
+			confService.createConfig();
+			confService.loadConfig();
+			
 			URL fxmlUrl = getClass().getResource("main.fxml");
 			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
 			fxmlLoader.setController(new MainTableContoller());

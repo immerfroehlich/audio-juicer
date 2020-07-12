@@ -41,6 +41,7 @@ public class DeviceInfo {
 		command.addParameter("--json");
 		command.addParameter("--output");
 		command.addParameter("name,type");
+		command.addParameter("-a");
 		
 		CommandExecutor cmd = new CommandExecutor();
 		Result result = cmd.execute(command);

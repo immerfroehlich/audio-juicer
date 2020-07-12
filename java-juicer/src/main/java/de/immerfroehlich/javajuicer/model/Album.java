@@ -8,9 +8,11 @@ public class Album {
 	public String artist;
 	public String title;
 	public String year;
+	public boolean multiCdRelease;
 	
 	public boolean allTracksSameArtist;
 	
 	public List<Mp3Track> tracks = new ArrayList<>();
+	public String cdNumber;
 
 }

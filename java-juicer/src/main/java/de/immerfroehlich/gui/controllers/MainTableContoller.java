@@ -18,6 +18,7 @@ import de.immerfroehlich.gui.TextInputDialog;
 import de.immerfroehlich.gui.YesNoDialog;
 import de.immerfroehlich.gui.controls.MasterDetailProgressBarDialog;
 import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
+import de.immerfroehlich.javajuicer.model.Album;
 import de.immerfroehlich.javajuicer.model.Configuration;
 import de.immerfroehlich.javajuicer.model.Mp3Track;
 import de.immerfroehlich.javajuicer.utils.FATCharRemover;
@@ -25,9 +26,11 @@ import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Medium;
 import de.immerfroehlich.musicbrainz.model.Release;
 import de.immerfroehlich.services.CdParanoiaService;
+import de.immerfroehlich.services.DeviceInfoService;
 import de.immerfroehlich.services.JavaJuicerService;
 import de.immerfroehlich.services.LibDiscIdService;
 import de.immerfroehlich.services.MusicBrainzService;
+import de.immerfroehlich.services.parser.FileNamingConfigParser;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
@@ -37,6 +40,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -54,9 +58,9 @@ public class MainTableContoller implements Initializable{
 	private JavaJuicerService javaJuicerService = new JavaJuicerService();
 	private CdParanoiaService cdService = new CdParanoiaService();
 	private Mp3TrackMapper mp3TrackMapper = new Mp3TrackMapper();
+	private DeviceInfoService deviceInfoService = new DeviceInfoService();
+	private FileNamingConfigParser fileNamingService = new FileNamingConfigParser();
 	
-	//TODO make a static access class that contains the scene and the config. 
-	private Configuration config = new Configuration();
 	private Release selectedYearRelease;
 	private Release selectedRelease;
 	private String releaseTitle;
@@ -89,13 +93,13 @@ public class MainTableContoller implements Initializable{
 		
 		buttonMusicbrainz.setOnAction(this::loadMusicBrainzInfos);
 		mp3Button.setOnAction(this::createMp3s);
+		settingsButton.setOnAction(this::openSettingsDialog);
 		
-		pathTextField.setText(config.rootPath);
-		pathTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
-			config.rootPath = pathTextField.getText();
-		});
-		pathTextField.setOnAction((e) -> {
-		});
+		pathTextField.textProperty().bind(Configuration.rootPath);
+		pathTextField.setDisable(true);
+		
+		List<String> devices = deviceInfoService.getDeviceList();
+		driveChoiceBox.setItems( FXCollections.observableArrayList(devices) );
 		
 		tableView.setItems(data);
 		
@@ -125,6 +129,22 @@ public class MainTableContoller implements Initializable{
 		this.progressBarDialog = new MasterDetailProgressBarDialog();
 	}
 	
+	private void openSettingsDialog(ActionEvent event) {
+		FXUtils.runAndWait(() -> {
+			URL fxmlUrl = getClass().getResource("settingsDialog.fxml");
+			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
+			SettingsDialogController settingsDialogController = new SettingsDialogController();
+			fxmlLoader.setController(settingsDialogController);
+			try {
+				Parent settingsDialogView = fxmlLoader.load();
+				settingsDialogController.initView(settingsDialogView);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+	}
+	
 	private void loadMusicBrainzInfos(ActionEvent event) {
 		Task<List<Mp3Track>> task = new Task<List<Mp3Track>>() {
 			@Override
@@ -133,7 +153,7 @@ public class MainTableContoller implements Initializable{
 //				String relText = releases.stream().map(x -> x.title).collect(Collectors.joining());
 //				System.out.println(relText);
 				
-				String discid = libDiscIdService.calculateDiscIdByDevicePath(config.drivePath);
+				String discid = libDiscIdService.calculateDiscIdByDevicePath(Configuration.drivePath.get());
 				System.out.println("Calculated DiscId is: " + discid);
 				Optional<Disc> discOpt = musicbrainzService.lookupDiscById(discid);
 				List<Release> releases;
@@ -216,22 +236,27 @@ public class MainTableContoller implements Initializable{
 					progressBarDialog.init();
 				});
 				
-				String rootPath = config.rootPath;
+				String rootPath = Configuration.rootPath.get();
 				String cdArtist = selectedRelease.artistCredit.get(0).name;
 				String cdTitle = selectedRelease.title;
 				cdArtist = FATCharRemover.removeUnallowedChars(cdArtist);
 				cdTitle = FATCharRemover.removeUnallowedChars(cdTitle);
 				
-				String mp3RootAlbumPath = rootPath + "/" + "mp3" + "/" + cdArtist + "/" + cdTitle;
-				String mp3CdPath = mp3RootAlbumPath;
-				String wavCdPath = rootPath + "/" + "wav" + "/" + cdArtist + "/" + cdTitle;
+				Album cdReleaseInfo = new Album();
+				cdReleaseInfo.artist = cdArtist;
+				cdReleaseInfo.title = cdTitle;
+				cdReleaseInfo.multiCdRelease = selectedRelease.multiCDRelease;
 				if(selectedRelease.multiCDRelease) {
-					String cdPathAddon = "/CD" + medium.position;
-					mp3CdPath += cdPathAddon;
-					wavCdPath += cdPathAddon;
+					cdReleaseInfo.cdNumber = medium.position;
 				}
-				String imagePath = mp3RootAlbumPath + "/" + "images";
+				
+				String directories = fileNamingService.parse(Configuration.naming.get(), cdReleaseInfo);
+				String mp3CdPath = rootPath + "/" + "mp3" + directories;
+				String wavCdPath = rootPath + "/" + "wav" + directories;
+				String imagePath = mp3CdPath + "/" + "images";
+				javaJuicerService.createPathWithParents(imagePath);
 				javaJuicerService.createPathWithParents(mp3CdPath);
+				javaJuicerService.createPathWithParents(wavCdPath);
 				
 				Mp3TrackMapper mp3TrackMapper = new Mp3TrackMapper();
 				String releaseDate = selectedYearRelease.date;
@@ -242,8 +267,6 @@ public class MainTableContoller implements Initializable{
 				frontCoverAvailable = promptForManualFrontCoverProvision(frontCoverAvailable, imagePath);
 				javaJuicerService.addFrontCoverPathTo(mp3Tracks, frontCoverAvailable, imagePath, coverArtDownloader);
 				
-				javaJuicerService.createPathWithParents(mp3CdPath);
-				javaJuicerService.createPathWithParents(wavCdPath);
 				
 				FXUtils.runAndWait(() -> {
 					progressBarDialog.masterTaskFinished();
@@ -278,7 +301,7 @@ public class MainTableContoller implements Initializable{
 		    			progressBarDialog.detailTaskFinished();
 		    		});
 				};
-				javaJuicerService.createMp3OfEachWav(wavCdPath, mp3CdPath, mp3Tracks, calculateProgressBar);
+				javaJuicerService.createMp3OfEachWav(wavCdPath, mp3CdPath, mp3Tracks, fileNamingService, calculateProgressBar);
 				
 				return null;
 			}

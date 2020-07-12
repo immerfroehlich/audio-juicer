@@ -1,9 +1,4 @@
  
-#buttonMusicbrainz {
-	/**-fx-background-image: url("musicbrainz-40px.png");**/
-	-fx-graphic: url("musicbrainz-40px.png");
-}
-
 .vboxImage {
 	-fx-border-color: black;
 	-fx-border-width: 2px;

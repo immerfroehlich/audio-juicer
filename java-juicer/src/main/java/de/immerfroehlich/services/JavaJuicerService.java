@@ -11,6 +11,7 @@ import de.immerfroehlich.command.Result;
 import de.immerfroehlich.coverartarchive.CoverArtArchiveDownloader;
 import de.immerfroehlich.javajuicer.model.Mp3Track;
 import de.immerfroehlich.javajuicer.utils.FATCharRemover;
+import de.immerfroehlich.services.parser.FileNamingConfigParser;
 
 public class JavaJuicerService {
 	
@@ -24,7 +25,7 @@ public class JavaJuicerService {
 		executor.execute(command);
 	}
 	
-	public void createMp3OfEachWav(String wavPath, String targetPath, List<Mp3Track> tracks, Runnable trackfinishedCallback) {
+	public void createMp3OfEachWav(String wavPath, String targetPath, List<Mp3Track> tracks, FileNamingConfigParser fileNamingService, Runnable trackfinishedCallback) {
     	List<File> files = listFilesOfFolder(wavPath);
     	Collections.sort(files);
     	
@@ -38,7 +39,8 @@ public class JavaJuicerService {
     		
     		Mp3Track track = tracks.get(i);
     		String trackNumber = createTrackNumber(i+1);
-    		String outputFile = trackNumber + " " + track.title + ".mp3";
+    		String outputFileWithoutType = fileNamingService.parseFileName(track, trackNumber);
+    		String outputFile = outputFileWithoutType + ".mp3";
     		outputFile = FATCharRemover.removeUnallowedChars(outputFile);
     		
     		String fullQualifiedInputFile = wavPath + "/" + inputFile;

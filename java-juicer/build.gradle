@@ -36,7 +36,7 @@ dependencies {
     
     compile 'commons-io:commons-io:2.6'
     
-    compile files ('libs')
+    compile files ('libs/CommandExecutor-1.0.0.jar')
     
     compile files ('../libdiscid-java-wrapper/native/build') //TODO: runtimeOnly doesn't work for the native libs
     compile files ('../libdiscid-java-wrapper/build/libs/libdiscid-java-wrapper.jar')
