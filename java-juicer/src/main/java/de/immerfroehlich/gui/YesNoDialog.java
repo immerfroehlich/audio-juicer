@@ -10,20 +10,22 @@ import javafx.scene.control.ButtonType;
 public class YesNoDialog {
 	
 	private String text;
+	private String question;
 	
-	public YesNoDialog(String text) {
+	public YesNoDialog(String text, String question) {
 		this.text = text;
+		this.question = question;
 	}
 	
 	public boolean showAndWait() {
 		
 		Alert alert = new Alert(AlertType.CONFIRMATION);
-		alert.setHeaderText(null);
+		alert.setHeaderText(question);
+		alert.setTitle(question);
 		
 		//TODO Workaround for openjfx bug 222. Remove after backport to Java 11 or update to Java 12
 		//See https://github.com/javafxports/openjdk-jfx/issues/222
 		alert.setResizable(true);
-		alert.setTitle("Confirmation Dialog with Custom Actions");
 		alert.setContentText(text);
 
 		ButtonType buttonTypeOne = new ButtonType("Yes", ButtonData.YES);

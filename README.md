@@ -88,6 +88,9 @@ TODO / Backlog
 - [ ] Bug: Progress bar doesn't disappear after work is finished. No finish dialog.
 - [ ] Add support for Multi-CD releases. Ask the user to select the right CD. (Is automation possible?)
 - [ ] The pregap track dialog is not asking any question, but the answers are yes and no. Add the question. After clicking yes the process doesn't stop - Fix it.
+- [ ] ??? Use different naming schemes for different kinds of releases - album (e.g. single artist release), compilation (e.g. Bravo Hits), interpreted music (e.g. classical music), audio books
+    - [ ] Select the kind of release before ripping.
+- [ ] Track numbers will currently not be displayed correctly in the main view table - Fix it.
 - [x] Pregap track (inaudible) - don't convert it to mp3. Remove the wav (Example: Genesis - Selling England..., Vangelis - Blade Runner)
 - [x] Add support for hidden audible pregap tracks (Example: Die Ärzte - 13)
 - [x] Selection of cdrom device
@@ -128,7 +131,7 @@ Seems to be a pregap track
 - [ ] Get away from the questions tirade for missing artwork and implement it the GUI way - which means graphically show that no artwork was found.
 	And add a button to manually select artwork.
 - [ ] ?Show an info dialog on first start explaining that this is a frontend to Musicbrainz for ripping. And if any data is not OK, go to musicbrainz and correct it.
-- [ ] Bug: The dialogs are missing action description that is given in command line. 
+- [x] Bug: The dialogs are missing action description that is given in command line. 
 
 
 Known Issues:
@@ -182,6 +185,7 @@ https://windowsreport.com/cd-ripper-software-windows-10/
 
 Feature Overview:
 ABCDE - Uses musicbrainz ws1 service which is out of support, currently not working
+Sound Juicer is not working under Ubuntu for years now (which is why I started this project)
 
 
 Development Knowledge Ressources

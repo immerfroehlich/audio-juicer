@@ -43,7 +43,8 @@ public class ReleaseSelectionDialogController implements Initializable {
 	private String label2;
 	private String label3;
 	
-	private String text = null;
+	private String text = "";
+	private String request = "";
 
 	
 	public ReleaseSelectionDialogController(List<Release> releases, String attributePath1, String attributePath2, String attributePath3,
@@ -116,16 +117,25 @@ public class ReleaseSelectionDialogController implements Initializable {
 	public void setText(String text) {
 		this.text = text;
 	}
+	
+	public void setRequest(String request) {
+		this.request = request;
+	}
 
 	private Dialog<Release> createDialog() {
 		Dialog<Release> dialog = new Dialog<>();
 		dialog.setResizable(true);
 		
-		if(text == null) {
+		if(text.isEmpty()) {
 			throw new IllegalStateException("You have to call setText before initialization first.");
 		}
+		if(request.isEmpty()) {
+			throw new IllegalStateException("You have to call setRequest before initialization first.");
+		}
 		
-		dialog.setHeaderText(text);
+		dialog.setTitle(request);
+		String headerText = text + "\n\n" + request;
+		dialog.setHeaderText(headerText);
 		dialog.getDialogPane().setContent(rootVBox);
 		ButtonType buttonTypeOne = new ButtonType("Select", ButtonData.APPLY);
 		dialog.getDialogPane().getButtonTypes().add(buttonTypeOne);

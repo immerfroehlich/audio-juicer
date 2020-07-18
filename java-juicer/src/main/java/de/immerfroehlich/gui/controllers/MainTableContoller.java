@@ -171,11 +171,11 @@ public class MainTableContoller implements Initializable{
 					return null;
 				}
 				
-				Release release = promptForRelease(releases, "Select release");
+				Release release = promptForRelease(releases, "Please select the right release");
 				release = musicbrainzService.reloadRelease(release);
 				//TODO Das erste Erscheinungsjahr lässt sich so nicht zuverlässig ermitteln! Wird bei Musicbrainz aber je Album angegeben.
 				//Ggf. das erste Erscheinungsjahr je Track ermitteln, z.B. bei Compilations
-				String releaseDate = promptForReleaseYear(selectedRelease.title, "Select first release date");
+				String releaseDate = promptForReleaseYear(selectedRelease.title, "Please select the first release date");
 				medium = promptForMedium(release);
 				
 				String cdArtist = release.artistCredit.get(0).name;
@@ -317,9 +317,10 @@ public class MainTableContoller implements Initializable{
 		if(frontCoverAvailable) return frontCoverAvailable;
 		
 		FXUtils.runAndWait(() -> {
+			String question = "Manually provide front cover?";
 			String text = "Would you like to manually provide a full size front cover to " + imagePath + "front.jpg ?\n"
 					+ "Then copy it to the given path and type 'y' afterwards (y/n)";
-			YesNoDialog dialog = new YesNoDialog(text);
+			YesNoDialog dialog = new YesNoDialog(text, question);
 			manualCoverDialogCorrect = dialog.showAndWait();
 		});
 		
@@ -330,9 +331,9 @@ public class MainTableContoller implements Initializable{
 		if(file.exists()) return true;
 		
 		FXUtils.runAndWait(() -> {
-			String text = "The front cover at " + fullPath + " could not be found.\n"
-					+ "Would you like to correct? (y/n)";
-			YesNoDialog dialog = new YesNoDialog(text);
+			String question = "Would you like to correct? (y/n)";
+			String text = "The front cover at " + fullPath + " could not be found.\n";
+			YesNoDialog dialog = new YesNoDialog(text, question);
 			manualCoverDialogCorrect = dialog.showAndWait();
 		});
 		
@@ -386,7 +387,8 @@ public class MainTableContoller implements Initializable{
 			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");
 			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
 			ReleaseSelectionDialogController dialogController = new ReleaseSelectionDialogController(releases, "artistCredit.name", "date", "media.format", "Artist:", "Date:", "Medium:");
-			dialogController.setText("Select first release date");
+			dialogController.setRequest("Select first release date");
+			dialogController.setText("Select the year where the songs where first released.");
 			
 			fxmlLoader.setController(dialogController);
 			try {
@@ -428,7 +430,7 @@ public class MainTableContoller implements Initializable{
 //		return releaseDate;
 	}
 
-	private Release promptForRelease(List<Release> releases, String string) {
+	private Release promptForRelease(List<Release> releases, String request) {
 		FXUtils.runAndWait(()->{
 			if(releases.size() == 1) {
 				selectedRelease = releases.get(0);
@@ -442,6 +444,7 @@ public class MainTableContoller implements Initializable{
 					+ "Please select the right release.\n"
 					+ "Most often the easiest way to do this is to compare the barcode numbers.\n"
 					+ "This is neccessary because the metadata and the artwork can be different.";
+			dialogController.setRequest(request);
 			dialogController.setText(text);
 			fxmlLoader.setController(dialogController);
 			try {
@@ -549,9 +552,9 @@ public class MainTableContoller implements Initializable{
 	private boolean inaudiblePregapTrackAvailable;
 	private boolean askToDeleteInaudiblePregapTrack(String filename) {
 		FXUtils.runAndWait(() -> {
-			String text = "If " + filename + " is the pregap track it will be deleted and the application tries to continue.\n"
-					+ "Is " + filename + " the inaudible pregap track?";
-			YesNoDialog dialog = new YesNoDialog(text);
+			String question = "Is " + filename + " the inaudible pregap track?";
+			String text = "If " + filename + " is the pregap track it will be deleted and the application tries to continue.";
+			YesNoDialog dialog = new YesNoDialog(text, question);
 			inaudiblePregapTrackAvailable = dialog.showAndWait();
 		});
 		
@@ -569,12 +572,13 @@ public class MainTableContoller implements Initializable{
 	private boolean audiblePregapTrackAvailable;
 	private boolean promptForAudiblePregapTrack() {
 		FXUtils.runAndWait(() -> {
+			String question = "Is the hidden (pregap) track audible?";
 			String text = "A track was found that is not listed on musicbrainz.org.\r\n”"
-					+ "Most propably this is a inaudible pregap track that was used in the past to calibrate\r\n"
+					+ "Most propably this is an inaudible pregap track that was used in the past to calibrate\r\n"
 					+ "old CD Players.\r\n"
 					+ "But it could be a hidden track that is audible but not listed on the cover.\r\n"
 					+ "Please listen to the WAV files and decide.\r\n\r\n";
-			YesNoDialog dialog = new YesNoDialog(text);
+			YesNoDialog dialog = new YesNoDialog(text, question);
 			audiblePregapTrackAvailable = dialog.showAndWait();
 		});
 		
