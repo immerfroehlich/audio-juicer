@@ -171,21 +171,21 @@ public class MainTableContoller implements Initializable{
 					return null;
 				}
 				
-				Release release = promptForRelease(releases, "Please select the right release");
-				release = musicbrainzService.reloadRelease(release);
+				selectedRelease = promptForRelease(releases, "Please select the right release");
+				selectedRelease = musicbrainzService.reloadRelease(selectedRelease);
 				//TODO Das erste Erscheinungsjahr lässt sich so nicht zuverlässig ermitteln! Wird bei Musicbrainz aber je Album angegeben.
 				//Ggf. das erste Erscheinungsjahr je Track ermitteln, z.B. bei Compilations
 				String releaseDate = promptForReleaseYear(selectedRelease.title, "Please select the first release date");
-				medium = promptForMedium(release);
+				medium = promptForMedium(selectedRelease);
 				
-				String cdArtist = release.artistCredit.get(0).name;
-				String cdTitle = release.title;
+				String cdArtist = selectedRelease.artistCredit.get(0).name;
+				String cdTitle = selectedRelease.title;
 				cdArtist = FATCharRemover.removeUnallowedChars(cdArtist);
 				cdTitle = FATCharRemover.removeUnallowedChars(cdTitle);
 				
-				lookupCoverArtForRelease(release);
+				lookupCoverArtForRelease(selectedRelease);
 				
-				List<Mp3Track> mp3Tracks = mp3TrackMapper.mapToMp3Tracks(release, releaseDate, medium);
+				List<Mp3Track> mp3Tracks = mp3TrackMapper.mapToMp3Tracks(selectedRelease, releaseDate, medium);
 				
 				return mp3Tracks;
 			}
@@ -343,39 +343,36 @@ public class MainTableContoller implements Initializable{
 		return promptForManualFrontCoverProvision(frontCoverAvailable, imagePath);
     }
 	
+	
 	private Medium promptForMedium(Release release) {
 		if(release.media.size() == 1) {
     		return release.media.get(0);
     	}
     	
-    	//TODO Reuse ReleaseSelectionDialog to select the first release year.
-		
-    	for(int i=0; i < release.media.size(); i++) {
-    		Medium media = release.media.get(i);
-			if(media.format.equals("CD")) {
-				System.out.println("[" + i + "]");
-				System.out.println(media.position);
-				System.out.println(media.trackCount);
-				
-				System.out.println("---------------");
-			}
-		}
-    	
     	if(release.media.size() > 1) {
     		release.multiCDRelease = true;
     	}
     	
-//    	Prompt prompt = new Prompt(System.in, System.out);
-//    	IntegerInputScanner scanner = new IntegerInputScanner();
-//    	System.out.print("Select CD:");
-//    	Integer number = prompt.getUserInput(scanner);
+    	FXUtils.runAndWait(() -> {
+			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");
+			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
+			ReleaseSelectionDialogController<Medium> dialogController = new ReleaseSelectionDialogController<>(release.media, "format", "position", "trackCount", "Medium:", "Position:", "Track count:");
+			dialogController.setRequest("Select first release date");
+			dialogController.setText("Select the year where the songs where first released.");
+			
+			fxmlLoader.setController(dialogController);
+			try {
+				fxmlLoader.load();
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
+			medium = dialogController.showAndWait();
+			selectedYearRelease = release;
+		});
     	
-    	System.err.println("Multi-CD releases currently not supported.");
-    	System.exit(1);
-    	
-    	int number = 0;//TODO: temp.
-    	
-		return release.media.get(number);
+		return medium;
 	}
 
 	
@@ -386,7 +383,7 @@ public class MainTableContoller implements Initializable{
 		FXUtils.runAndWait(() -> {
 			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");
 			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
-			ReleaseSelectionDialogController dialogController = new ReleaseSelectionDialogController(releases, "artistCredit.name", "date", "media.format", "Artist:", "Date:", "Medium:");
+			ReleaseSelectionDialogController<Release> dialogController = new ReleaseSelectionDialogController<>(releases, "artistCredit.name", "date", "media.format", "Artist:", "Date:", "Medium:");
 			dialogController.setRequest("Select first release date");
 			dialogController.setText("Select the year where the songs where first released.");
 			
@@ -439,7 +436,7 @@ public class MainTableContoller implements Initializable{
 			
 			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");
 			FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
-			ReleaseSelectionDialogController dialogController = new ReleaseSelectionDialogController(releases, "title", "date", "barcode", "Title:", "Date: ", "Barcode: ");
+			ReleaseSelectionDialogController<Release> dialogController = new ReleaseSelectionDialogController<>(releases, "title", "date", "barcode", "Title:", "Date: ", "Barcode: ");
 			String text = "More then one release was found that has the same track list as your CD.\n"
 					+ "Please select the right release.\n"
 					+ "Most often the easiest way to do this is to compare the barcode numbers.\n"

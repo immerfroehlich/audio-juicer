@@ -1,6 +1,6 @@
 # Audio Juicer
 
-Simple Tool that rips wav files from audio CDs and converts them to MP3 or whatever you like
+Simple Tool that extracts wav files from audio CDs and converts them to MP3 or whatever you like
 by using command line tools.
 Technically it's a frontend to cdparanoia, lame and others (in future versions).
 
@@ -85,9 +85,10 @@ Important features (sorted by priority from the most important on the top):
 
 TODO / Backlog
 ------------------------
-- [ ] Bug: Progress bar doesn't disappear after work is finished. No finish dialog.
-- [ ] Add support for Multi-CD releases. Ask the user to select the right CD. (Is automation possible?)
-- [ ] The pregap track dialog is not asking any question, but the answers are yes and no. Add the question. After clicking yes the process doesn't stop - Fix it.
+- [x] Bug: Progress bar doesn't disappear after work is finished. No finish dialog.
+- [x] Add support for Multi-CD releases. Ask the user to select the right CD.
+	- [ ] Automate the selection of the right CD in multi CD releases (if possible).
+- [x] The pregap track dialog is not asking any question, but the answers are yes and no. Add the question. After clicking yes the process doesn't stop - Fix it.
 - [ ] ??? Use different naming schemes for different kinds of releases - album (e.g. single artist release), compilation (e.g. Bravo Hits), interpreted music (e.g. classical music), audio books
     - [ ] Select the kind of release before ripping.
 - [ ] Track numbers will currently not be displayed correctly in the main view table - Fix it.

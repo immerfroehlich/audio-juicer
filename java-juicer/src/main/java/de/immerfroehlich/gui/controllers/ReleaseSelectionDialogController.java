@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import de.immerfroehlich.javajuicer.utils.ReflectionUtils;
-import de.immerfroehlich.musicbrainz.model.Release;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,7 +20,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 
-public class ReleaseSelectionDialogController implements Initializable {
+public class ReleaseSelectionDialogController <T> implements Initializable {
 	
 	FXMLLoader fxmlLoader;
 	
@@ -29,12 +28,12 @@ public class ReleaseSelectionDialogController implements Initializable {
 	@FXML private ScrollPane selectionScrollPane;
 	@FXML private VBox releaseSelectionVBox;
 	@FXML private ScrollPane detailScrollPane;
-	private Dialog<Release> dialog;
+	private Dialog<T> dialog;
 	private Button selectButton;
 	
-	private List<Release> releases;
+	private List<T> releases;
 	
-	private Release selectedRelease;
+	private T selectedRelease;
 
 	private String attributePath1;
 	private String attributePath3;
@@ -47,7 +46,7 @@ public class ReleaseSelectionDialogController implements Initializable {
 	private String request = "";
 
 	
-	public ReleaseSelectionDialogController(List<Release> releases, String attributePath1, String attributePath2, String attributePath3,
+	public ReleaseSelectionDialogController(List<T> releases, String attributePath1, String attributePath2, String attributePath3,
 			String label1, String label2, String label3) {
 		this.attributePath1 = attributePath1;
 		this.attributePath2 = attributePath2;
@@ -61,7 +60,7 @@ public class ReleaseSelectionDialogController implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		for(Release release : releases) {
+		for(T release : releases) {
 			ToggleButton button = createReleaseSelectionToggleButton(release);
 			releaseSelectionVBox.getChildren().add(button);
 		}
@@ -69,7 +68,7 @@ public class ReleaseSelectionDialogController implements Initializable {
 		this.dialog = createDialog();
 	}
 	
-	private ToggleButton createReleaseSelectionToggleButton(Release release) {
+	private ToggleButton createReleaseSelectionToggleButton(T release) {
 		ToggleButton button = null;
 		try {
 			URL fxmlUrl = getClass().getResource("releaseSelectionToggleButton.fxml");
@@ -109,8 +108,8 @@ public class ReleaseSelectionDialogController implements Initializable {
 		return button;
 	}
 	
-	public Release showAndWait() {
-		Release release = dialog.showAndWait().get();
+	public T showAndWait() {
+		T release = dialog.showAndWait().get();
 		return release;
 	}
 	
@@ -122,8 +121,8 @@ public class ReleaseSelectionDialogController implements Initializable {
 		this.request = request;
 	}
 
-	private Dialog<Release> createDialog() {
-		Dialog<Release> dialog = new Dialog<>();
+	private Dialog<T> createDialog() {
+		Dialog<T> dialog = new Dialog<>();
 		dialog.setResizable(true);
 		
 		if(text.isEmpty()) {
