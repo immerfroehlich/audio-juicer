@@ -85,7 +85,7 @@ Important features (sorted by priority from the most important on the top):
 
 TODO / Backlog
 ------------------------
-- [x] Bug: Progress bar doesn't disappear after work is finished. No finish dialog.
+- [ ] Bug: Progress bar doesn't disappear after work is finished. No finish dialog.
 - [x] Add support for Multi-CD releases. Ask the user to select the right CD.
 	- [ ] Automate the selection of the right CD in multi CD releases (if possible).
 - [x] The pregap track dialog is not asking any question, but the answers are yes and no. Add the question. After clicking yes the process doesn't stop - Fix it.

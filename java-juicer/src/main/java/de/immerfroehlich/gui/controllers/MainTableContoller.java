@@ -270,8 +270,8 @@ public class MainTableContoller implements Initializable{
 				
 				FXUtils.runAndWait(() -> {
 					progressBarDialog.masterTaskFinished();
-					progressBarDialog.setMasterText("Ripping CD");
-					progressBarDialog.setDetailText("Ripping CD");
+					progressBarDialog.setMasterText("Extracting CD audio");
+					progressBarDialog.setDetailText("Extracting CD audio");
 					progressBarDialog.setDetailTaskNumber(1);
 					progressBarDialog.init();
 				});
@@ -280,8 +280,8 @@ public class MainTableContoller implements Initializable{
 				
 				FXUtils.runAndWait(() -> {
 					progressBarDialog.masterTaskFinished();
-					progressBarDialog.setMasterText("Ripping CD");
-					progressBarDialog.setDetailText("Ripping CD");
+					progressBarDialog.setMasterText("Extracting CD audio");
+					progressBarDialog.setDetailText("Extracting CD audio");
 					progressBarDialog.setDetailTaskNumber(1);
 					progressBarDialog.init();
 				});				
