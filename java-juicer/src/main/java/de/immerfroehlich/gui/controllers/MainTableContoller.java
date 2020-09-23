@@ -225,6 +225,8 @@ public class MainTableContoller implements Initializable{
 	
 	private void createMp3s(ActionEvent event) {
 		
+		progressBarDialog = new MasterDetailProgressBarDialog();
+		
 		Task<Object> task = new Task<Object>() {
 			@Override
 			protected Object call() throws Exception {
@@ -233,7 +235,7 @@ public class MainTableContoller implements Initializable{
 					progressBarDialog.setDetailText("Downloading Images");
 					progressBarDialog.setMasterTaskNumber(3);
 					progressBarDialog.setDetailTaskNumber(1);
-					progressBarDialog.init();
+					progressBarDialog.update();
 				});
 				
 				String rootPath = Configuration.rootPath.get();
@@ -274,7 +276,7 @@ public class MainTableContoller implements Initializable{
 					progressBarDialog.setMasterText("Extracting CD audio");
 					progressBarDialog.setDetailText("Extracting CD audio");
 					progressBarDialog.setDetailTaskNumber(1);
-					progressBarDialog.init();
+					progressBarDialog.update();
 				});
 				
 				cdService.ripWavFromStdCdromTo(wavCdPath);
@@ -284,7 +286,7 @@ public class MainTableContoller implements Initializable{
 					progressBarDialog.setMasterText("Extracting CD audio");
 					progressBarDialog.setDetailText("Extracting CD audio");
 					progressBarDialog.setDetailTaskNumber(1);
-					progressBarDialog.init();
+					progressBarDialog.update();
 				});				
 				
 				findPregapTrack(mp3Tracks, wavCdPath);
@@ -294,7 +296,7 @@ public class MainTableContoller implements Initializable{
 					progressBarDialog.setMasterText("Creating MP3s");
 					progressBarDialog.setDetailText("Converting Track to MP3");
 					progressBarDialog.setDetailTaskNumber(mp3Tracks.size());
-					progressBarDialog.init();
+					progressBarDialog.update();
 				});				
 				
 				Runnable calculateProgressBar = () -> {

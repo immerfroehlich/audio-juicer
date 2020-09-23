@@ -49,7 +49,7 @@ public class MasterDetailProgressBarTestMain extends Application {
 		dialog.setDetailTaskNumber(10);
 		dialog.setMasterText("Ripping CD");
 		dialog.setDetailText("Converting Track 1 to MP3");
-		dialog.init();
+		dialog.update();
 		dialog.show();
 		
 		Task<Integer> task = new Task<>() {

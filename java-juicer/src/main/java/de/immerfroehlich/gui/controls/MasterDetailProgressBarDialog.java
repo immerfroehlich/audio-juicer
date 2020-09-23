@@ -73,7 +73,7 @@ public class MasterDetailProgressBarDialog {
 		alert.show();
 	}
 	
-	public void init() {
+	public void update() {
 		updateMasterTaskLabel();
 		updateDetailTaskLabel();
 	}
