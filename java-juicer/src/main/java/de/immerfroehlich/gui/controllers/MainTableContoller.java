@@ -263,7 +263,8 @@ public class MainTableContoller implements Initializable{
 				List<Mp3Track> mp3Tracks = mp3TrackMapper.mapToMp3Tracks(selectedRelease, releaseDate, medium);
 				
 				CoverArtArchiveDownloader coverArtDownloader = new CoverArtArchiveDownloader();
-				boolean frontCoverAvailable = coverArtDownloader.downloadImages(selectedRelease, imagePath);
+				final String imagePathWithSeparator = imagePath + File.separatorChar;
+				boolean frontCoverAvailable = coverArtDownloader.downloadImages(selectedRelease, imagePathWithSeparator);
 				frontCoverAvailable = promptForManualFrontCoverProvision(frontCoverAvailable, imagePath);
 				javaJuicerService.addFrontCoverPathTo(mp3Tracks, frontCoverAvailable, imagePath, coverArtDownloader);
 				
