@@ -319,9 +319,11 @@ public class MainTableContoller implements Initializable{
 	private boolean promptForManualFrontCoverProvision(boolean frontCoverAvailable, String imagePath) {
 		if(frontCoverAvailable) return frontCoverAvailable;
 		
+		String fullPath = imagePath + File.separator + "front.jpg";
+		
 		FXUtils.runAndWait(() -> {
 			String question = "Manually provide front cover?";
-			String text = "Would you like to manually provide a full size front cover to " + imagePath + "front.jpg ?\n"
+			String text = "Would you like to manually provide a full size front cover to " + fullPath + "?\n"
 					+ "Then copy it to the given path and type 'y' afterwards (y/n)";
 			YesNoDialog dialog = new YesNoDialog(text, question);
 			manualCoverDialogCorrect = dialog.showAndWait();
@@ -329,7 +331,6 @@ public class MainTableContoller implements Initializable{
 		
 		if(!manualCoverDialogCorrect) return false;
 		
-		String fullPath = imagePath + "front.jpg";
 		File file = new File(fullPath);
 		if(file.exists()) return true;
 		

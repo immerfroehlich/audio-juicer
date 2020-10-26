@@ -181,7 +181,10 @@ Linux:
 Source: https://www.slant.co/topics/2443/~best-cd-rippers-for-linuxs
 
 Windows:
-https://windowsreport.com/cd-ripper-software-windows-10/
+- CDex (https://cdex.mu/)
+- fre:ac (https://www.freac.org/)
+
+Source: https://windowsreport.com/cd-ripper-software-windows-10/
 
 
 Feature Overview:
@@ -205,6 +208,30 @@ lame --preset standard sample.wav sample.mp3
 
 ImageMagick (Front cover resizing):
 convert -resize 300x300 front.jpg front_small.jpg
+
+
+Ideas on using and installing Audio Juicer in Windows
+-----------------------------------------------------
+- CDex can be called from the command line
+	"-autorip" will rip all tracks
+	Source: https://hydrogenaud.io/index.php?topic=40092.0
+-Or directly use the libcdio library which has the cdparanoia library included for windows
+ but this will probably take many more hours.
+	
+- Lame is also available for Windows and is licenced LGPL
+	Source: https://lame.sourceforge.io/
+	
+- Replacement for imagemagik ???
+	- Maybe http://www.graphicsmagick.org/ it says it is a copy of imagemagick with MIT style licence.
+	Source: https://alternativeto.net/software/imagemagick/
+	
+- Redhat distributes an OpenJDK for windows, maybe it is possible to extract the vm
+  and repackage it, if redistribution is allowed:
+  https://access.redhat.com/documentation/en-us/openjdk/11/html/openjdk_11_for_windows_getting_started_guide/getting_started_with_openjdk_for_windows#installing_openjdk_zip_bundle
+  
+- The so called Microsoft Desktop Bridge allows to package Java Applications for the Windows Store
+	Source: https://stackoverflow.com/a/43945785
+	Source 2: https://github.com/crramirez/uwp_bridge_java
 
 
 Infos:
