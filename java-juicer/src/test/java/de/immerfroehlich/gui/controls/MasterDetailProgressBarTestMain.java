@@ -6,7 +6,7 @@ import java.util.function.BiConsumer;
 import de.immerfroehlich.gui.ApplicationContext;
 import de.immerfroehlich.gui.FXUtils;
 import de.immerfroehlich.gui.controls.MasterDetailProgressBarDialog;
-import de.immerfroehlich.javajuicer.model.Mp3Track;
+import de.immerfroehlich.javajuicer.model.TrackInfo;
 import javafx.application.Application;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;

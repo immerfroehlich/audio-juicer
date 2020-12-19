@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import de.immerfroehlich.javajuicer.model.Album;
-import de.immerfroehlich.javajuicer.model.Mp3Track;
+import de.immerfroehlich.javajuicer.model.AlbumInfo;
+import de.immerfroehlich.javajuicer.model.TrackInfo;
 
 public class FileNamingConfigParserTest {
 
@@ -14,7 +14,7 @@ public class FileNamingConfigParserTest {
 		String naming = "</CD%c>/%a/%l/%n %t";
 		FileNamingConfigParser parser = new FileNamingConfigParser();
 		
-		Album albumInfo = new Album();
+		AlbumInfo albumInfo = new AlbumInfo();
 		albumInfo.artist = "Artist";
 		albumInfo.title = "AlbumTitle";
 		albumInfo.multiCdRelease = false;
@@ -23,11 +23,11 @@ public class FileNamingConfigParserTest {
 		
 		assertEquals("/Artist/AlbumTitle", directories);
 		
-		Mp3Track track = new Mp3Track();
+		TrackInfo track = new TrackInfo();
 		track.title = "TrackTitle";
 		track.artist = "TrackArtist";
 		String trackNumber = "11";
-		String fileName = parser.parseFileName(track, trackNumber);
+		String fileName = parser.parseFileName(track);
 		
 		assertEquals("11 "+ track.title, fileName);
 	}
@@ -37,7 +37,7 @@ public class FileNamingConfigParserTest {
 		String naming = "/%a/%l</CD%c>/%n %t";
 		FileNamingConfigParser parser = new FileNamingConfigParser();
 		
-		Album albumInfo = new Album();
+		AlbumInfo albumInfo = new AlbumInfo();
 		albumInfo.artist = "Artist";
 		albumInfo.title = "AlbumTitle";
 		albumInfo.multiCdRelease = true;
@@ -53,7 +53,7 @@ public class FileNamingConfigParserTest {
 		String naming = "/%a/%l/%n %t";
 		FileNamingConfigParser parser = new FileNamingConfigParser();
 		
-		Album albumInfo = new Album();
+		AlbumInfo albumInfo = new AlbumInfo();
 		albumInfo.artist = "Artist";
 		albumInfo.title = "AlbumTitle";
 		albumInfo.multiCdRelease = true;
@@ -69,7 +69,7 @@ public class FileNamingConfigParserTest {
 		String naming = "/%a - %l/<CD%c>/%n-%a-%r - %t";
 		FileNamingConfigParser parser = new FileNamingConfigParser();
 		
-		Album albumInfo = new Album();
+		AlbumInfo albumInfo = new AlbumInfo();
 		albumInfo.artist = "Artist";
 		albumInfo.title = "AlbumTitle";
 		albumInfo.multiCdRelease = true;
@@ -79,11 +79,11 @@ public class FileNamingConfigParserTest {
 		
 		assertEquals("/Artist - AlbumTitle/CD2", directories);
 		
-		Mp3Track track = new Mp3Track();
+		TrackInfo track = new TrackInfo();
 		track.title = "TrackTitle";
 		track.artist = "TrackArtist";
 		String trackNumber = "11";
-		String fileName = parser.parseFileName(track, trackNumber);
+		String fileName = parser.parseFileName(track);
 		
 		assertEquals(trackNumber + "-" + albumInfo.artist + "-" + track.artist + " - " + track.title, fileName);
 	}

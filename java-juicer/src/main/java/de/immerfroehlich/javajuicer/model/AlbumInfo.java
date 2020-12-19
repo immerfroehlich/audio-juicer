@@ -3,7 +3,7 @@ package de.immerfroehlich.javajuicer.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Album {
+public class AlbumInfo {
 	
 	public String artist;
 	public String title;
@@ -12,7 +12,7 @@ public class Album {
 	
 	public boolean allTracksSameArtist;
 	
-	public List<Mp3Track> tracks = new ArrayList<>();
+	public List<TrackInfo> tracks = new ArrayList<>();
 	public String cdNumber;
 
 }

@@ -85,6 +85,7 @@ Important features (sorted by priority from the most important on the top):
 
 TODO / Backlog
 ------------------------
+- [ ] Use the drive selection for ripping and musicbrainz retrieval currently it is not used.
 - [ ] Bug: Progress bar doesn't disappear after work is finished. No finish dialog.
 - [x] Add support for Multi-CD releases. Ask the user to select the right CD.
 	- [ ] Automate the selection of the right CD in multi CD releases (if possible).

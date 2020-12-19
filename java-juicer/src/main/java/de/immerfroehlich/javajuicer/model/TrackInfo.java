@@ -1,6 +1,6 @@
 package de.immerfroehlich.javajuicer.model;
 
-public class Mp3Track {
+public class TrackInfo {
 	
 	public String artist = "";
 	public String title = "";
@@ -8,6 +8,7 @@ public class Mp3Track {
 	public String releaseYear = "";
 	public boolean isPregap = false;
 	public Cover cover = new Cover();
+	public String trackNumber = "02"; //TODO fill this with the right trackNumber
 	
 	@Override
 	public String toString() {

@@ -17,10 +17,14 @@ import de.immerfroehlich.gui.InfoAlert;
 import de.immerfroehlich.gui.TextInputDialog;
 import de.immerfroehlich.gui.YesNoDialog;
 import de.immerfroehlich.gui.controls.MasterDetailProgressBarDialog;
+import de.immerfroehlich.gui.modules.settings.NamingSchemeExampleUpdater;
+import de.immerfroehlich.gui.modules.settings.ObservablePattern;
+import de.immerfroehlich.gui.modules.settings.ObservablePatternStringConverter;
+import de.immerfroehlich.gui.modules.settings.SettingsDialogController;
 import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
-import de.immerfroehlich.javajuicer.model.Album;
+import de.immerfroehlich.javajuicer.model.AlbumInfo;
 import de.immerfroehlich.javajuicer.model.Configuration;
-import de.immerfroehlich.javajuicer.model.Mp3Track;
+import de.immerfroehlich.javajuicer.model.TrackInfo;
 import de.immerfroehlich.javajuicer.utils.FATCharRemover;
 import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Medium;
@@ -31,6 +35,7 @@ import de.immerfroehlich.services.JavaJuicerService;
 import de.immerfroehlich.services.LibDiscIdService;
 import de.immerfroehlich.services.MusicBrainzService;
 import de.immerfroehlich.services.parser.FileNamingConfigParser;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
@@ -66,6 +71,8 @@ public class MainTableContoller implements Initializable{
 	private String releaseTitle;
 	private Medium medium;
 	private boolean manualCoverDialogCorrect;
+	private String selectedNamingScheme;
+	private List<TrackInfo> loadedTrackInfos;
 	
 	@FXML private Button buttonMusicbrainz;
 	@FXML private Button mp3Button;
@@ -78,6 +85,8 @@ public class MainTableContoller implements Initializable{
 	@FXML private VBox vboxImages;
 	@FXML private Label driveLabel;
 	@FXML private ChoiceBox<String> driveChoiceBox;
+	@FXML private ChoiceBox<ObservablePattern> namingSchemeChoiceBox;
+	@FXML private TextField namingExampleTextField;
 	@FXML private Label pathLabel;
 	@FXML private TextField pathTextField;
 	
@@ -100,6 +109,9 @@ public class MainTableContoller implements Initializable{
 		
 		List<String> devices = deviceInfoService.getDeviceList();
 		driveChoiceBox.setItems( FXCollections.observableArrayList(devices) );
+		namingSchemeChoiceBox.getItems().setAll(Configuration.namings);
+		namingSchemeChoiceBox.getSelectionModel().selectedIndexProperty().addListener(this::setNamingScheme);
+		namingSchemeChoiceBox.setConverter(new ObservablePatternStringConverter());
 		
 		tableView.setItems(data);
 		
@@ -145,10 +157,18 @@ public class MainTableContoller implements Initializable{
 		});
 	}
 	
+	private void setNamingScheme(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+		selectedNamingScheme = namingSchemeChoiceBox.getItems().get(newValue.intValue()).pattern.getValue();
+		NamingSchemeExampleUpdater updater = new NamingSchemeExampleUpdater();
+		AlbumInfo album = createAlbumInfo();
+		TrackInfo track = loadedTrackInfos.get(1);
+		updater.updateExampleTextField(selectedNamingScheme, namingExampleTextField, album, track);
+	}
+	
 	private void loadMusicBrainzInfos(ActionEvent event) {
-		Task<List<Mp3Track>> task = new Task<List<Mp3Track>>() {
+		Task<List<TrackInfo>> task = new Task<List<TrackInfo>>() {
 			@Override
-			protected List<Mp3Track> call() throws Exception {
+			protected List<TrackInfo> call() throws Exception {
 //				List<Release> releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
 //				String relText = releases.stream().map(x -> x.title).collect(Collectors.joining());
 //				System.out.println(relText);
@@ -185,18 +205,18 @@ public class MainTableContoller implements Initializable{
 				
 				lookupCoverArtForRelease(selectedRelease);
 				
-				List<Mp3Track> mp3Tracks = mp3TrackMapper.mapToMp3Tracks(selectedRelease, releaseDate, medium);
+				List<TrackInfo> mp3Tracks = mp3TrackMapper.mapToMp3Tracks(selectedRelease, releaseDate, medium);
 				
 				return mp3Tracks;
 			}
 		};
 		
-		BiConsumer<WorkerStateEvent, Service<List<Mp3Track>>> onSucceededCallback = (event1, service) -> {
-			List<Mp3Track> result = service.getValue();
-			mapper.map(result);
+		BiConsumer<WorkerStateEvent, Service<List<TrackInfo>>> onSucceededCallback = (event1, service) -> {
+			this.loadedTrackInfos = service.getValue();
+			mapper.map(loadedTrackInfos);
 		};
 		
-		Service<List<Mp3Track>> service = FXUtils.createService(task, onSucceededCallback);
+		Service<List<TrackInfo>> service = FXUtils.createService(task, onSucceededCallback);
 		service.start();
 		
 //		calculateDiscIdService = FXUtils.createServiceTask( () -> {
@@ -239,20 +259,9 @@ public class MainTableContoller implements Initializable{
 				});
 				
 				String rootPath = Configuration.rootPath.get();
-				String cdArtist = selectedRelease.artistCredit.get(0).name;
-				String cdTitle = selectedRelease.title;
-				cdArtist = FATCharRemover.removeUnallowedChars(cdArtist);
-				cdTitle = FATCharRemover.removeUnallowedChars(cdTitle);
+				AlbumInfo cdReleaseInfo = createAlbumInfo();
 				
-				Album cdReleaseInfo = new Album();
-				cdReleaseInfo.artist = cdArtist;
-				cdReleaseInfo.title = cdTitle;
-				cdReleaseInfo.multiCdRelease = selectedRelease.multiCDRelease;
-				if(selectedRelease.multiCDRelease) {
-					cdReleaseInfo.cdNumber = medium.position;
-				}
-				
-				String directories = fileNamingService.parse(Configuration.naming.get(), cdReleaseInfo);
+				String directories = fileNamingService.parse(selectedNamingScheme, cdReleaseInfo);
 				String mp3CdPath = rootPath + "/" + "mp3" + directories;
 				String wavCdPath = rootPath + "/" + "wav" + directories;
 				String imagePath = mp3CdPath + "/" + "images";
@@ -262,7 +271,7 @@ public class MainTableContoller implements Initializable{
 				
 				Mp3TrackMapper mp3TrackMapper = new Mp3TrackMapper();
 				String releaseDate = selectedYearRelease.date;
-				List<Mp3Track> mp3Tracks = mp3TrackMapper.mapToMp3Tracks(selectedRelease, releaseDate, medium);
+				List<TrackInfo> mp3Tracks = mp3TrackMapper.mapToMp3Tracks(selectedRelease, releaseDate, medium);
 				
 				CoverArtArchiveDownloader coverArtDownloader = new CoverArtArchiveDownloader();
 				final String imagePathWithSeparator = imagePath + File.separatorChar;
@@ -498,7 +507,7 @@ public class MainTableContoller implements Initializable{
 		});
 	}
 	
-	private void findPregapTrack(List<Mp3Track> mp3Tracks, String wavPath) {
+	private void findPregapTrack(List<TrackInfo> mp3Tracks, String wavPath) {
 		List<File> files = javaJuicerService.listFilesOfFolder(wavPath);
 		Collections.sort(files);
 		
@@ -584,6 +593,22 @@ public class MainTableContoller implements Initializable{
 		});
 		
 		return audiblePregapTrackAvailable;
+	}
+
+	private AlbumInfo createAlbumInfo() {
+		String cdArtist = selectedRelease.artistCredit.get(0).name;
+		String cdTitle = selectedRelease.title;
+		cdArtist = FATCharRemover.removeUnallowedChars(cdArtist);
+		cdTitle = FATCharRemover.removeUnallowedChars(cdTitle);
+		
+		AlbumInfo cdReleaseInfo = new AlbumInfo();
+		cdReleaseInfo.artist = cdArtist;
+		cdReleaseInfo.title = cdTitle;
+		cdReleaseInfo.multiCdRelease = selectedRelease.multiCDRelease;
+		if(selectedRelease.multiCDRelease) {
+			cdReleaseInfo.cdNumber = medium.position;
+		}
+		return cdReleaseInfo;
 	}
 	
 }

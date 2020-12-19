@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.immerfroehlich.javajuicer.model.Album;
-import de.immerfroehlich.javajuicer.model.Mp3Track;
+import de.immerfroehlich.javajuicer.model.AlbumInfo;
+import de.immerfroehlich.javajuicer.model.TrackInfo;
 
 public class FileNamingConfigParser {
 	
 	private String directories = "";
 	private String fileName = "";
 	
-	public String parse(String fileNamingConfig, Album albumInfo) {
+	public String parse(String fileNamingConfig, AlbumInfo albumInfo) {
 		if(!albumInfo.multiCdRelease) {
 			//Remove all optional cd terms
 			int start = fileNamingConfig.indexOf("<");
@@ -42,7 +42,7 @@ public class FileNamingConfigParser {
 		return this.directories;
 	}
 
-	private String replaceVariables(String fileNamingConfig, Album albumInfo) {
+	private String replaceVariables(String fileNamingConfig, AlbumInfo albumInfo) {
 		fileNamingConfig = fileNamingConfig.replace("%a", albumInfo.artist);
 		fileNamingConfig = fileNamingConfig.replace("%c", albumInfo.cdNumber);
 		fileNamingConfig = fileNamingConfig.replace("<", "");
@@ -51,18 +51,18 @@ public class FileNamingConfigParser {
 		return fileNamingConfig;
 	}
 	
-	private String replaceVariablesInFilename(String fileNamingConfig, Mp3Track mp3Track, String trackNumber) {
-		fileNamingConfig = fileNamingConfig.replace("%n", trackNumber);
+	private String replaceVariablesInFilename(String fileNamingConfig, TrackInfo mp3Track) {
+		fileNamingConfig = fileNamingConfig.replace("%n", mp3Track.trackNumber);
 		fileNamingConfig = fileNamingConfig.replace("%r", mp3Track.artist);
 		fileNamingConfig = fileNamingConfig.replace("%t", mp3Track.title);
 		return fileNamingConfig;
 	}
 
-	public String parseFileName(Mp3Track mp3Track, String trackNumber) {
+	public String parseFileName(TrackInfo mp3Track) {
 		if(fileName.isEmpty()) {
 			throw new IllegalStateException("Use the other parse method first to get the filename scheme.");
 		}
-		return replaceVariablesInFilename(this.fileName, mp3Track, trackNumber);
+		return replaceVariablesInFilename(this.fileName, mp3Track);
 	}
 
 }

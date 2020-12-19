@@ -9,7 +9,7 @@ import de.immerfroehlich.command.Command;
 import de.immerfroehlich.command.CommandExecutor;
 import de.immerfroehlich.command.Result;
 import de.immerfroehlich.coverartarchive.CoverArtArchiveDownloader;
-import de.immerfroehlich.javajuicer.model.Mp3Track;
+import de.immerfroehlich.javajuicer.model.TrackInfo;
 import de.immerfroehlich.javajuicer.utils.FATCharRemover;
 import de.immerfroehlich.services.parser.FileNamingConfigParser;
 
@@ -25,7 +25,7 @@ public class JavaJuicerService {
 		executor.execute(command);
 	}
 	
-	public void createMp3OfEachWav(String wavPath, String targetPath, List<Mp3Track> tracks, FileNamingConfigParser fileNamingService, Runnable trackfinishedCallback) {
+	public void createMp3OfEachWav(String wavPath, String targetPath, List<TrackInfo> tracks, FileNamingConfigParser fileNamingService, Runnable trackfinishedCallback) {
     	List<File> files = listFilesOfFolder(wavPath);
     	Collections.sort(files);
     	
@@ -37,9 +37,9 @@ public class JavaJuicerService {
     		
     		String inputFile = fileSystemEntity.getName();
     		
-    		Mp3Track track = tracks.get(i);
+    		TrackInfo track = tracks.get(i);
     		String trackNumber = createTrackNumber(i+1);
-    		String outputFileWithoutType = fileNamingService.parseFileName(track, trackNumber);
+    		String outputFileWithoutType = fileNamingService.parseFileName(track);
     		String outputFile = outputFileWithoutType + ".mp3";
     		outputFile = FATCharRemover.removeUnallowedChars(outputFile);
     		
@@ -78,7 +78,7 @@ public class JavaJuicerService {
 		return trackNumber;
 	}
 	
-	public static Result createMp3Of(String fullQualifiedInputFile, String fullQualifiedOuputFile, Mp3Track track, String trackNumber) {
+	public static Result createMp3Of(String fullQualifiedInputFile, String fullQualifiedOuputFile, TrackInfo track, String trackNumber) {
     	Command command = new Command();
 		command.setCommand("lame");
 		command.addParameter("--preset");
@@ -113,13 +113,13 @@ public class JavaJuicerService {
 		return result;
     }
 	
-	public void addFrontCoverPathTo(List<Mp3Track> mp3Tracks, boolean frontCoverAvailable, String imagePath, CoverArtArchiveDownloader coverArtDownloader) {
+	public void addFrontCoverPathTo(List<TrackInfo> mp3Tracks, boolean frontCoverAvailable, String imagePath, CoverArtArchiveDownloader coverArtDownloader) {
 		if(!frontCoverAvailable) return;
 		
 		String fullImagePath = coverArtDownloader.resizeFrontCoverImage(imagePath);
 		if(fullImagePath.isEmpty()) return;
 		
-		for(Mp3Track mp3Track : mp3Tracks) {
+		for(TrackInfo mp3Track : mp3Tracks) {
 			mp3Track.cover.hasFrontCover = true;
 			mp3Track.cover.frontCoverPath = fullImagePath;
 		}
