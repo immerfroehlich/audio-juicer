@@ -18,8 +18,8 @@ import de.immerfroehlich.gui.TextInputDialog;
 import de.immerfroehlich.gui.YesNoDialog;
 import de.immerfroehlich.gui.controls.MasterDetailProgressBarDialog;
 import de.immerfroehlich.gui.modules.settings.NamingSchemeExampleUpdater;
-import de.immerfroehlich.gui.modules.settings.ObservablePattern;
-import de.immerfroehlich.gui.modules.settings.ObservablePatternStringConverter;
+import de.immerfroehlich.gui.modules.settings.ObservableNamingScheme;
+import de.immerfroehlich.gui.modules.settings.ObservableNamingSchemeStringConverter;
 import de.immerfroehlich.gui.modules.settings.SettingsDialogController;
 import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
 import de.immerfroehlich.javajuicer.model.AlbumInfo;
@@ -85,7 +85,7 @@ public class MainTableContoller implements Initializable{
 	@FXML private VBox vboxImages;
 	@FXML private Label driveLabel;
 	@FXML private ChoiceBox<String> driveChoiceBox;
-	@FXML private ChoiceBox<ObservablePattern> namingSchemeChoiceBox;
+	@FXML private ChoiceBox<ObservableNamingScheme> namingSchemeChoiceBox;
 	@FXML private TextField namingExampleTextField;
 	@FXML private Label pathLabel;
 	@FXML private TextField pathTextField;
@@ -109,9 +109,11 @@ public class MainTableContoller implements Initializable{
 		
 		List<String> devices = deviceInfoService.getDeviceList();
 		driveChoiceBox.setItems( FXCollections.observableArrayList(devices) );
-		namingSchemeChoiceBox.getItems().setAll(Configuration.namings);
+		driveChoiceBox.getSelectionModel().selectFirst();
+		updateNamingSchemeChoiceBox();
 		namingSchemeChoiceBox.getSelectionModel().selectedIndexProperty().addListener(this::setNamingScheme);
-		namingSchemeChoiceBox.setConverter(new ObservablePatternStringConverter());
+		namingSchemeChoiceBox.setConverter(new ObservableNamingSchemeStringConverter());
+		namingSchemeChoiceBox.getSelectionModel().selectFirst();
 		
 		tableView.setItems(data);
 		
@@ -149,7 +151,7 @@ public class MainTableContoller implements Initializable{
 			fxmlLoader.setController(settingsDialogController);
 			try {
 				Parent settingsDialogView = fxmlLoader.load();
-				settingsDialogController.initView(settingsDialogView);
+				settingsDialogController.initView(settingsDialogView, this::updateNamingSchemeChoiceBox);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -158,11 +160,20 @@ public class MainTableContoller implements Initializable{
 	}
 	
 	private void setNamingScheme(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-		selectedNamingScheme = namingSchemeChoiceBox.getItems().get(newValue.intValue()).pattern.getValue();
+		selectedNamingScheme = namingSchemeChoiceBox.getItems().get(newValue.intValue()).scheme.getValue();
 		NamingSchemeExampleUpdater updater = new NamingSchemeExampleUpdater();
+		if(selectedRelease == null) {
+			updater.updateExampleTextField(selectedNamingScheme, namingExampleTextField);
+			return;
+		}
+		
 		AlbumInfo album = createAlbumInfo();
 		TrackInfo track = loadedTrackInfos.get(1);
 		updater.updateExampleTextField(selectedNamingScheme, namingExampleTextField, album, track);
+	}
+	
+	private void updateNamingSchemeChoiceBox() {
+		namingSchemeChoiceBox.getItems().setAll(Configuration.namingSchemes);
 	}
 	
 	private void loadMusicBrainzInfos(ActionEvent event) {

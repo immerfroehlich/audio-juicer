@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.immerfroehlich.gui.modules.settings.ObservablePattern;
+import de.immerfroehlich.gui.modules.settings.ObservableNamingScheme;
 import de.immerfroehlich.javajuicer.model.Configuration;
 import de.immerfroehlich.javajuicer.model.config.ConfigModel;
 import de.immerfroehlich.javajuicer.model.config.Naming;
@@ -117,8 +117,8 @@ public class ConfigurationService {
 		ConfigModel config = new ConfigModel();
 		config.rootPath = Configuration.rootPath.getValue();
 		config.drivePath = Configuration.drivePath.getValue();
-		List<Naming> presets = Configuration.namings.stream()
-				.map(guiPreset -> new Naming(guiPreset.name.getValue(), guiPreset.pattern.getValue()))
+		List<Naming> presets = Configuration.namingSchemes.stream()
+				.map(guiPreset -> new Naming(guiPreset.name.getValue(), guiPreset.scheme.getValue()))
 				.collect(Collectors.toList());
 		config.namings = presets;
 		
@@ -132,10 +132,10 @@ public class ConfigurationService {
 		
 		Configuration.rootPath.setValue(config.rootPath);
 		Configuration.drivePath.setValue(config.drivePath);
-		List<ObservablePattern> presets = config.namings.stream()
-				.map(filePreset -> new ObservablePattern(new SimpleStringProperty(filePreset.name), new SimpleStringProperty(filePreset.pattern)))
+		List<ObservableNamingScheme> presets = config.namings.stream()
+				.map(filePreset -> new ObservableNamingScheme(new SimpleStringProperty(filePreset.name), new SimpleStringProperty(filePreset.pattern)))
 				.collect(Collectors.toList());
-		Configuration.namings.addAll(presets);
+		Configuration.namingSchemes.addAll(presets);
 	}
 
 }

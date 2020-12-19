@@ -103,8 +103,8 @@
                         <RowConstraints maxHeight="335.00000762939453" minHeight="0.0" prefHeight="35.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <Label text="Naming pattern:" GridPane.rowIndex="2" />
-                        <TextField fx:id="namingTextField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label text="Scheme:" GridPane.rowIndex="2" />
+                        <TextField fx:id="schemeTextField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                         <Button fx:id="updateExampleButton" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="2">
                            <graphic>
                               <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true" smooth="false">
@@ -116,13 +116,13 @@
                         <Label text="Example" GridPane.rowIndex="3" />
                         <TextField fx:id="exampleTextField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                         <Label alignment="TOP_LEFT" prefHeight="379.0" prefWidth="311.0" text="Use &quot;/&quot; if you want to separate folders.&#10;&#10;You can use the following variables:&#10;&#10;For Album info:&#10;&quot;%a&quot; for album Artist, &quot;%l&quot; for aLbum title and &quot;%c&quot; for Cd number. You can put a &quot;%c&quot; variable inside an optional&#10;term like this: &quot;&lt;/CD%c&gt;&quot;. For releases that only have one CD this will be removed.&#10;But don't use any other variables inside it.&#10;&#10;For Track info:&#10;&quot;%n&quot; for track Number&quot;, %t for track Title, %r for track aRtist.&#10;&#10;Don't use Track info for folders." wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                        <ChoiceBox fx:id="presetChoiceBox" prefWidth="150.0" GridPane.columnIndex="1" />
-                        <Label text="Preset" />
-                        <Button fx:id="addPresetButton" mnemonicParsing="false" text="Add" GridPane.columnIndex="2" />
-                        <Button fx:id="removePresetButton" mnemonicParsing="false" text="Remove" GridPane.columnIndex="3" />
-                        <Label text="Preset name" GridPane.rowIndex="1" />
-                        <TextField fx:id="presetNameTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Button fx:id="updatePresetButton" mnemonicParsing="false" text="Update Preset" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <ChoiceBox fx:id="namingSchemeChoiceBox" prefWidth="150.0" GridPane.columnIndex="1" />
+                        <Label text="Naming scheme" />
+                        <Button fx:id="addNamingSchemeButton" mnemonicParsing="false" text="Add" GridPane.columnIndex="2" />
+                        <Button fx:id="removeNamingSchemeButton" mnemonicParsing="false" text="Remove" GridPane.columnIndex="3" />
+                        <Label text="Scheme name" GridPane.rowIndex="1" />
+                        <TextField fx:id="schemeNameTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Button fx:id="updateNamingSchemeButton" mnemonicParsing="false" text="Update Scheme" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                      </children>
                   </GridPane>
                </children>

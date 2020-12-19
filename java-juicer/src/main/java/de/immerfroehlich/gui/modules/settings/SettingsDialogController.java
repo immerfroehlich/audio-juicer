@@ -19,68 +19,78 @@ import javafx.scene.control.TextField;
 public class SettingsDialogController implements Initializable {
 	
 	@FXML private TextField archivePathTextField;
-	@FXML private ChoiceBox<ObservablePattern> presetChoiceBox;
-	@FXML private Button addPresetButton;
-	@FXML private Button removePresetButton;
-	@FXML private TextField presetNameTextField;
-	@FXML private TextField namingTextField;
+	@FXML private ChoiceBox<ObservableNamingScheme> namingSchemeChoiceBox;
+	@FXML private Button addNamingSchemeButton;
+	@FXML private Button removeNamingSchemeButton;
+	@FXML private TextField schemeNameTextField;
+	@FXML private TextField schemeTextField;
 	@FXML private TextField exampleTextField;
 	@FXML private Button updateExampleButton;
-	@FXML private Button updatePresetButton;
+	@FXML private Button updateNamingSchemeButton;
 	@FXML private Button saveButton;
 	@FXML private Button cancelButton;
 	
-	private ObservablePattern selectedPreset;
+	private ObservableNamingScheme selectedPreset;
 	
 	ConfigurationService configService = new ConfigurationService();
 	private Parent settingsDialogView;
+	private Runnable onCloseCallback;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		archivePathTextField.setText(Configuration.rootPath.get());
 		
-		presetChoiceBox.setConverter(new ObservablePatternStringConverter());		
+		namingSchemeChoiceBox.setConverter(new ObservableNamingSchemeStringConverter());		
 		
-		presetChoiceBox.getItems().addAll(Configuration.namings); //BUGFIX: ChoiceBox not correctly listening to changes to the underlying list.
-	    presetChoiceBox.getSelectionModel().selectedIndexProperty().addListener(this::selectPreset);
+		namingSchemeChoiceBox.getItems().addAll(Configuration.namingSchemes); //BUGFIX: ChoiceBox not correctly listening to changes to the underlying list.
+	    namingSchemeChoiceBox.getSelectionModel().selectedIndexProperty().addListener(this::selectNamingScheme);
+	    namingSchemeChoiceBox.getSelectionModel().selectFirst();
 		
-		addPresetButton.setOnAction(this::addPreset);
+		addNamingSchemeButton.setOnAction(this::addNamingScheme);
+		removeNamingSchemeButton.setOnAction(this::removeNamingScheme);
 		updateExampleButton.setOnAction(this::updateExample);
-		updatePresetButton.setOnAction(this::updatePreset);
+		updateNamingSchemeButton.setOnAction(this::updateNamingScheme);
 		saveButton.setOnAction(this::save);
 		cancelButton.setOnAction(this::cancel);
 	}
 	
-	private void addPreset(ActionEvent event) {
-		ObservablePattern preset = new ObservablePattern(new SimpleStringProperty("Unnamed"), new SimpleStringProperty(""));
-		Configuration.namings.add(preset);
-		presetChoiceBox.getItems().add(preset); //BUGFIX: ChoiceBox not correctly listening to changes to the underlying list.
-		namingTextField.setText(preset.pattern.getValue());
+	private void addNamingScheme(ActionEvent event) {
+		ObservableNamingScheme preset = new ObservableNamingScheme(new SimpleStringProperty("Unnamed"), new SimpleStringProperty("/%a/%l</CD%c>/%n %t"));
+		Configuration.namingSchemes.add(preset);
+		namingSchemeChoiceBox.getItems().add(preset); //BUGFIX: ChoiceBox not correctly listening to changes to the underlying list.
+		schemeTextField.setText(preset.scheme.getValue());
+		namingSchemeChoiceBox.getSelectionModel().select(preset);
 	}
 	
-	private void selectPreset(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-		selectedPreset = Configuration.namings.get(newValue.intValue());
+	private void removeNamingScheme(ActionEvent event) {
+		Configuration.namingSchemes.remove(selectedPreset);
+		namingSchemeChoiceBox.getItems().remove(selectedPreset);
+		namingSchemeChoiceBox.getSelectionModel().select(0); 
+	}
+	
+	private void selectNamingScheme(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+		selectedPreset = namingSchemeChoiceBox.getItems().get((newValue.intValue())); //TODO leads to an IndexOutOfBoundsException in the underlying List. Bug in JavaFX?
 		
-		presetNameTextField.setText(selectedPreset.name.getValue());
-		namingTextField.setText(selectedPreset.pattern.getValue());
+		schemeNameTextField.setText(selectedPreset.name.getValue());
+		schemeTextField.setText(selectedPreset.scheme.getValue());
 		updateExample(null);
 	}
 
 	private void updateExample(ActionEvent event) {
 		NamingSchemeExampleUpdater updater = new NamingSchemeExampleUpdater();
-		updater.updateExampleTextField(namingTextField.getText(), exampleTextField);
+		updater.updateExampleTextField(schemeTextField.getText(), exampleTextField);
 	}
 	
-	private void updatePreset(ActionEvent event) {
-		selectedPreset.name.setValue(presetNameTextField.getText());
-		selectedPreset.pattern.setValue(namingTextField.getText());
+	private void updateNamingScheme(ActionEvent event) {
+		selectedPreset.name.setValue(schemeNameTextField.getText());
+		selectedPreset.scheme.setValue(schemeTextField.getText());
 		try {
 			updateExample(null);
 		} catch(RuntimeException e) {
-			namingTextField.setStyle("-fx-control-inner-background: #BA55D3;");
+			schemeTextField.setStyle("-fx-control-inner-background: #BA55D3;");
 		}
-		presetChoiceBox.getItems().clear();
-		presetChoiceBox.getItems().addAll(Configuration.namings);
+		namingSchemeChoiceBox.getItems().clear();
+		namingSchemeChoiceBox.getItems().addAll(Configuration.namingSchemes);
 	}
 	
 	private void save(ActionEvent event) {
@@ -95,10 +105,12 @@ public class SettingsDialogController implements Initializable {
 	
 	private void restoreMainView() {
 		ApplicationContext.stackPane.getChildren().remove(settingsDialogView);
+		onCloseCallback.run();
 	}
 
-	public void initView(Parent settingsDialogView) {
+	public void initView(Parent settingsDialogView, Runnable onCloseCallback) {
 		this.settingsDialogView = settingsDialogView;
+		this.onCloseCallback = onCloseCallback;
 		ApplicationContext.stackPane.getChildren().add(settingsDialogView);
 	}
 }

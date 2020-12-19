@@ -3,15 +3,15 @@ package de.immerfroehlich.gui.modules.settings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class ObservablePattern {
+public class ObservableNamingScheme {
 	
-	public ObservablePattern(StringProperty name, StringProperty pattern) {
+	public ObservableNamingScheme(StringProperty name, StringProperty scheme) {
 		super();
 		this.name = name;
-		this.pattern = pattern;
+		this.scheme = scheme;
 	}
 	public StringProperty name = new SimpleStringProperty();
-	public StringProperty pattern = new SimpleStringProperty();
+	public StringProperty scheme = new SimpleStringProperty();
 	
 }
 

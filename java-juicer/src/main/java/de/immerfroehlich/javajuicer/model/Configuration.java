@@ -1,6 +1,6 @@
 package de.immerfroehlich.javajuicer.model;
 
-import de.immerfroehlich.gui.modules.settings.ObservablePattern;
+import de.immerfroehlich.gui.modules.settings.ObservableNamingScheme;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -13,7 +13,7 @@ public class Configuration {
 	
 	public static StringProperty drivePath = new SimpleStringProperty();
 	
-	public static ObservableList<ObservablePattern> namings = FXCollections.observableArrayList(
-			preset -> new Observable[]{preset.name, preset.pattern});
+	public static ObservableList<ObservableNamingScheme> namingSchemes = FXCollections.observableArrayList(
+			namingScheme -> new Observable[]{namingScheme.name, namingScheme.scheme});
 	
 }

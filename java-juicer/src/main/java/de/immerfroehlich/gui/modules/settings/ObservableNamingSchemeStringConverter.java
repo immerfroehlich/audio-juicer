@@ -3,16 +3,16 @@ package de.immerfroehlich.gui.modules.settings;
 import de.immerfroehlich.javajuicer.model.Configuration;
 import javafx.util.StringConverter;
 
-public class ObservablePatternStringConverter extends StringConverter<ObservablePattern>{
+public class ObservableNamingSchemeStringConverter extends StringConverter<ObservableNamingScheme>{
 	
 	@Override
-	public String toString(ObservablePattern object) {
+	public String toString(ObservableNamingScheme object) {
 		return object.name.getValue();
 	}
 	
 	@Override
-	public ObservablePattern fromString(String string) {
-		for(ObservablePattern pattern: Configuration.namings) {
+	public ObservableNamingScheme fromString(String string) {
+		for(ObservableNamingScheme pattern: Configuration.namingSchemes) {
 			if(pattern.name.getValue().equals(string)) {
 				return pattern;
 			}

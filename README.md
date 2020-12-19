@@ -68,7 +68,7 @@ Here is an example configuration for VM-Arguments of the Application configurati
 Features
 ==========
 
-Important features (sorted by priority from the most important on the top):
+Important features:
 - [ ] Free Software GPLv2 or GPLv3
 - [ ] Fixed lame presets (with joint stereo) [Really needed? Just preset standard implemented. For classical music FLAC would probably better.
 - [x] Musicbrainz / CDDB retrieval of Artist name, Album name, Song name
@@ -78,7 +78,7 @@ Important features (sorted by priority from the most important on the top):
 - [ ] For Archiving purposes Hash generation for each file and comparison (sha2)
 - [ ] For Archiving: Parallel generation of mp3 and flac
 - [x] GUI (JavaFX or Swing)
-- [ ] User presets (just enter the command line)
+- [ ] User presets (just enter the command line) [??? Is this really needed? Or just stick to the standard presets that lame offers]
 - [ ] If not available easy user upload of artist name etc to Musicbrainz (is this really needed? Musicbrainz already has a GUI on their web page, ask the user to input their CD info on their web page.)
 - [ ] (Archive database?)
 
@@ -86,12 +86,14 @@ Important features (sorted by priority from the most important on the top):
 TODO / Backlog
 ------------------------
 - [ ] Use the drive selection for ripping and musicbrainz retrieval currently it is not used.
-- [ ] Bug: Progress bar doesn't disappear after work is finished. No finish dialog.
+- [ ] Bug: Progress bar doesn't disappear after work is finished. No finish dialog. [Reproduction try to load a CD from musicbrainz, that is not listed there]
 - [x] Add support for Multi-CD releases. Ask the user to select the right CD.
 	- [ ] Automate the selection of the right CD in multi CD releases (if possible).
 - [x] The pregap track dialog is not asking any question, but the answers are yes and no. Add the question. After clicking yes the process doesn't stop - Fix it.
-- [ ] ??? Use different naming schemes for different kinds of releases - album (e.g. single artist release), compilation (e.g. Bravo Hits), interpreted music (e.g. classical music), audio books
-    - [ ] Select the kind of release before ripping.
+- [x] Use different naming schemes for different kinds of releases - album (e.g. single artist release), compilation (e.g. Bravo Hits), interpreted music (e.g. classical music), audio books
+    - [x] Select the kind of release before ripping.
+    - [ ] Selecting a naming scheme after adding a new leads to IndexOutOfBoundException is this a bug in JavaFX???
+    - [ ] Create a modal dialog to add/edit/remove  naming schemes currently this is not very user friendly (and maybe just select the default one).
 - [ ] Track numbers will currently not be displayed correctly in the main view table - Fix it.
 - [x] Pregap track (inaudible) - don't convert it to mp3. Remove the wav (Example: Genesis - Selling England..., Vangelis - Blade Runner)
 - [x] Add support for hidden audible pregap tracks (Example: Die Ärzte - 13)
