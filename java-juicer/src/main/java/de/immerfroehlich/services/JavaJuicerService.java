@@ -38,7 +38,6 @@ public class JavaJuicerService {
     		String inputFile = fileSystemEntity.getName();
     		
     		TrackInfo track = tracks.get(i);
-    		String trackNumber = createTrackNumber(i+1);
     		String outputFileWithoutType = fileNamingService.parseFileName(track);
     		String outputFile = outputFileWithoutType + ".mp3";
     		outputFile = FATCharRemover.removeUnallowedChars(outputFile);
@@ -46,7 +45,7 @@ public class JavaJuicerService {
     		String fullQualifiedInputFile = wavPath + "/" + inputFile;
     		String fullQualifiedOuputFile = targetPath + "/" + outputFile;
     		
-    		Result result = createMp3Of(fullQualifiedInputFile, fullQualifiedOuputFile, track, trackNumber);
+    		Result result = createMp3Of(fullQualifiedInputFile, fullQualifiedOuputFile, track);
     		trackfinishedCallback.run();
     		
     		if(result.hasErrors()) {
@@ -59,7 +58,7 @@ public class JavaJuicerService {
     			System.out.println(line);
     		}
     		
-    		System.out.println("Track " + trackNumber + " finished.");
+    		System.out.println("Track " + track.trackNumber + " finished.");
     	}
     }
 	
@@ -69,16 +68,7 @@ public class JavaJuicerService {
 		return files;
 	}
 	
-	private static String createTrackNumber(int i) {
-    	String trackNumber = "";
-		if(i < 10) {
-			trackNumber = "0";
-		}
-		trackNumber += i;
-		return trackNumber;
-	}
-	
-	public static Result createMp3Of(String fullQualifiedInputFile, String fullQualifiedOuputFile, TrackInfo track, String trackNumber) {
+	public static Result createMp3Of(String fullQualifiedInputFile, String fullQualifiedOuputFile, TrackInfo track) {
     	Command command = new Command();
 		command.setCommand("lame");
 		command.addParameter("--preset");
@@ -97,7 +87,7 @@ public class JavaJuicerService {
 		command.addParameter("--ty");
 		command.addParameter(track.firstReleaseYear);
 		command.addParameter("--tn");
-		command.addParameter(trackNumber);
+		command.addParameter(track.trackNumber);
 		
 		if(track.cover.hasFrontCover) {
 			command.addParameter("--ti");

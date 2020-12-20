@@ -21,7 +21,7 @@ import de.immerfroehlich.gui.modules.settings.NamingSchemeExampleUpdater;
 import de.immerfroehlich.gui.modules.settings.ObservableNamingScheme;
 import de.immerfroehlich.gui.modules.settings.ObservableNamingSchemeStringConverter;
 import de.immerfroehlich.gui.modules.settings.SettingsDialogController;
-import de.immerfroehlich.javajuicer.mappers.Mp3TrackMapper;
+import de.immerfroehlich.javajuicer.mappers.TrackInfoMapper;
 import de.immerfroehlich.javajuicer.model.AlbumInfo;
 import de.immerfroehlich.javajuicer.model.Configuration;
 import de.immerfroehlich.javajuicer.model.TrackInfo;
@@ -62,7 +62,7 @@ public class MainTableContoller implements Initializable{
 	private CoverArtService coverArtService = new CoverArtService();
 	private JavaJuicerService javaJuicerService = new JavaJuicerService();
 	private CdParanoiaService cdService = new CdParanoiaService();
-	private Mp3TrackMapper mp3TrackMapper = new Mp3TrackMapper();
+	private TrackInfoMapper mp3TrackMapper = new TrackInfoMapper();
 	private DeviceInfoService deviceInfoService = new DeviceInfoService();
 	private FileNamingConfigParser fileNamingService = new FileNamingConfigParser();
 	
@@ -216,7 +216,7 @@ public class MainTableContoller implements Initializable{
 				
 				lookupCoverArtForRelease(selectedRelease);
 				
-				List<TrackInfo> mp3Tracks = mp3TrackMapper.mapToMp3Tracks(selectedRelease, releaseDate, medium);
+				List<TrackInfo> mp3Tracks = mp3TrackMapper.mapToTrackInfos(selectedRelease, releaseDate, medium);
 				
 				return mp3Tracks;
 			}
@@ -280,9 +280,9 @@ public class MainTableContoller implements Initializable{
 				javaJuicerService.createPathWithParents(mp3CdPath);
 				javaJuicerService.createPathWithParents(wavCdPath);
 				
-				Mp3TrackMapper mp3TrackMapper = new Mp3TrackMapper();
+				TrackInfoMapper mp3TrackMapper = new TrackInfoMapper();
 				String releaseDate = selectedYearRelease.date;
-				List<TrackInfo> mp3Tracks = mp3TrackMapper.mapToMp3Tracks(selectedRelease, releaseDate, medium);
+				List<TrackInfo> mp3Tracks = mp3TrackMapper.mapToTrackInfos(selectedRelease, releaseDate, medium);
 				
 				CoverArtArchiveDownloader coverArtDownloader = new CoverArtArchiveDownloader();
 				final String imagePathWithSeparator = imagePath + File.separatorChar;

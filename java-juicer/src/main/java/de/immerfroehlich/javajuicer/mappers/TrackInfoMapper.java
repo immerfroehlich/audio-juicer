@@ -9,9 +9,9 @@ import de.immerfroehlich.musicbrainz.model.Pregap;
 import de.immerfroehlich.musicbrainz.model.Release;
 import de.immerfroehlich.musicbrainz.model.Track;
 
-public class Mp3TrackMapper {
+public class TrackInfoMapper {
 	
-	public List<TrackInfo> mapToMp3Tracks(Release release, String releaseDate, Medium medium) {
+	public List<TrackInfo> mapToTrackInfos(Release release, String releaseDate, Medium medium) {
 		List<TrackInfo> tracks = new ArrayList<>();
     	
     	Pregap pregap = medium.pregap;
@@ -42,9 +42,19 @@ public class Mp3TrackMapper {
 			mp3Track.releaseYear = release.date;
 			mp3Track.firstReleaseYear = releaseDate;
 			mp3Track.title = track.title;
+			mp3Track.trackNumber = createTrackNumber(track.position);
 			tracks.add(mp3Track);
 		}
 		return tracks;
+	}
+	
+	private String createTrackNumber(int i) {
+    	String trackNumber = "";
+		if(i < 10) {
+			trackNumber = "0";
+		}
+		trackNumber += i;
+		return trackNumber;
 	}
 
 }
