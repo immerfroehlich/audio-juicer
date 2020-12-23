@@ -3,6 +3,7 @@ package de.immerfroehlich.gui.controllers;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -13,10 +14,10 @@ import de.immerfroehlich.coverartarchive.CoverArtArchiveDownloader;
 import de.immerfroehlich.coverartarchive.CoverArtService;
 import de.immerfroehlich.coverartarchive.model.Image;
 import de.immerfroehlich.gui.FXUtils;
-import de.immerfroehlich.gui.InfoAlert;
-import de.immerfroehlich.gui.TextInputDialog;
-import de.immerfroehlich.gui.YesNoDialog;
+import de.immerfroehlich.gui.controls.CopyableTextInfoDialog;
+import de.immerfroehlich.gui.controls.InfoAlert;
 import de.immerfroehlich.gui.controls.MasterDetailProgressBarDialog;
+import de.immerfroehlich.gui.controls.YesNoDialog;
 import de.immerfroehlich.gui.modules.settings.NamingSchemeExampleUpdater;
 import de.immerfroehlich.gui.modules.settings.ObservableNamingScheme;
 import de.immerfroehlich.gui.modules.settings.ObservableNamingSchemeStringConverter;
@@ -35,6 +36,7 @@ import de.immerfroehlich.services.JavaJuicerService;
 import de.immerfroehlich.services.LibDiscIdService;
 import de.immerfroehlich.services.MusicBrainzService;
 import de.immerfroehlich.services.parser.FileNamingConfigParser;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -73,6 +75,7 @@ public class MainTableContoller implements Initializable{
 	private boolean manualCoverDialogCorrect;
 	private String selectedNamingScheme;
 	private List<TrackInfo> loadedTrackInfos;
+	private String selectedDrive;
 	
 	@FXML private Button buttonMusicbrainz;
 	@FXML private Button mp3Button;
@@ -109,6 +112,12 @@ public class MainTableContoller implements Initializable{
 		
 		List<String> devices = deviceInfoService.getDeviceList();
 		driveChoiceBox.setItems( FXCollections.observableArrayList(devices) );
+		driveChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				selectedDrive = newValue;
+			}
+		});
 		driveChoiceBox.getSelectionModel().selectFirst();
 		updateNamingSchemeChoiceBox();
 		namingSchemeChoiceBox.getSelectionModel().selectedIndexProperty().addListener(this::setNamingScheme);
@@ -180,17 +189,21 @@ public class MainTableContoller implements Initializable{
 		Task<List<TrackInfo>> task = new Task<List<TrackInfo>>() {
 			@Override
 			protected List<TrackInfo> call() throws Exception {
-//				List<Release> releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
-//				String relText = releases.stream().map(x -> x.title).collect(Collectors.joining());
-//				System.out.println(relText);
-				
-				String discid = libDiscIdService.calculateDiscIdByDevicePath(Configuration.drivePath.get());
+				Optional<String> discidOpt = libDiscIdService.calculateDiscIdByDevicePath(selectedDrive);
+				if(discidOpt.isEmpty()) {
+					showNoDiscInsertedDialog();
+					return new ArrayList<>();
+				}
+				String discid = discidOpt.get();
 				System.out.println("Calculated DiscId is: " + discid);
 				Optional<Disc> discOpt = musicbrainzService.lookupDiscById(discid);
 				List<Release> releases;
-				if(!discOpt.isPresent()) {
-					String releaseTitle = promptForReleaseTitle();
-					releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
+				if(discOpt.isEmpty()) {
+					String toc = libDiscIdService.getDiscToc(selectedDrive).get();
+					String tocAddLink = musicbrainzService.createTocAddLink(discid, toc);
+					showTocDialog(tocAddLink);
+					//releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
+					return new ArrayList<>();
 				}
 				else {
 					releases = discOpt.get().releases;
@@ -199,7 +212,7 @@ public class MainTableContoller implements Initializable{
 				boolean noReleasesFound = releases.size() == 0; 
 				if(noReleasesFound) {
 					showNoReleaseFoundDialog();
-					return null;
+					return new ArrayList<>();
 				}
 				
 				selectedRelease = promptForRelease(releases, "Please select the right release");
@@ -252,8 +265,13 @@ public class MainTableContoller implements Initializable{
 
 	}
 	
-	
-	
+	protected void showNoDiscInsertedDialog() {
+		FXUtils.runAndWait(() -> {
+			InfoAlert alert = new InfoAlert("No CD is inserted into the selected drive. Please insert CD.");
+			alert.showAndWait();
+		});
+	}
+
 	private void createMp3s(ActionEvent event) {
 		
 		progressBarDialog = new MasterDetailProgressBarDialog();
@@ -492,13 +510,16 @@ public class MainTableContoller implements Initializable{
 		});
 	}
 	
-	private String promptForReleaseTitle() {
+	private void showTocDialog(final String toc) {
 		FXUtils.runAndWait(()->{
-			TextInputDialog dialog = new TextInputDialog("Please enter the release title.");
-			releaseTitle = dialog.showAndWait();
-			System.out.println(releaseTitle);
+			String text = 
+					"The CD is not yet listed on musicbrainz.org. \n\n"
+					+ "Please add this CD to musicbrainz.org via the given "
+					+ "link and enter the tracklist and artist information. \n\n"
+					+ "Copy the following link to your browser to add the CD:";
+			CopyableTextInfoDialog alert = new CopyableTextInfoDialog(text, toc);
+			alert.showAndWait();
 		});
-		return releaseTitle;
 	}
 	
 	private void lookupCoverArtForRelease(Release release) {

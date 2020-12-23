@@ -19,7 +19,8 @@ import de.immerfroehlich.musicbrainz.model.Release;
 
 public class MusicbrainzWs2Service {
 	
-	public static final String BASE_URL = "https://musicbrainz.org/ws/2/";
+	public static final String MUSICBRAINZ_BASE_URL = "https://musicbrainz.org";	
+	public static final String BASE_URL = MUSICBRAINZ_BASE_URL + "/ws/2/";
 	
 	private Client client;
 

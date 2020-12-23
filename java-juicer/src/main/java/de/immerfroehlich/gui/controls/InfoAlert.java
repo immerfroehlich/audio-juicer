@@ -1,4 +1,4 @@
-package de.immerfroehlich.gui;
+package de.immerfroehlich.gui.controls;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;

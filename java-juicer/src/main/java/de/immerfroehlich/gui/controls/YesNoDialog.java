@@ -1,4 +1,4 @@
-package de.immerfroehlich.gui;
+package de.immerfroehlich.gui.controls;
 
 import java.util.Optional;
 

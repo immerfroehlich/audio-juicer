@@ -40,6 +40,8 @@ public class ConfigurationServiceTest {
 	@Test
 	public void testSaving() {
 		
+		//TODO: The test seems to overwrite the users config file. Why? I stubbed the method for file opening.
+		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 				
 		ConfigurationService configService = spy(new ConfigurationService());

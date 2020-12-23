@@ -26,7 +26,7 @@ public class FileNamingConfigParserTest {
 		TrackInfo track = new TrackInfo();
 		track.title = "TrackTitle";
 		track.artist = "TrackArtist";
-		String trackNumber = "11";
+		track.trackNumber = "11";
 		String fileName = parser.parseFileName(track);
 		
 		assertEquals("11 "+ track.title, fileName);
@@ -82,10 +82,10 @@ public class FileNamingConfigParserTest {
 		TrackInfo track = new TrackInfo();
 		track.title = "TrackTitle";
 		track.artist = "TrackArtist";
-		String trackNumber = "11";
+		track.trackNumber = "11";
 		String fileName = parser.parseFileName(track);
 		
-		assertEquals(trackNumber + "-" + albumInfo.artist + "-" + track.artist + " - " + track.title, fileName);
+		assertEquals(track.trackNumber + "-" + albumInfo.artist + "-" + track.artist + " - " + track.title, fileName);
 	}
 	
 }

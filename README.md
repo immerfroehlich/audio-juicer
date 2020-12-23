@@ -33,18 +33,21 @@ git clone --recurse-submodules -j8 https://github.com/immerfroehlich/audio-juice
 
 cd audio-juicer
 
-./gradlew build
+./gradlew distZip
 
 Call
 ./run.sh
 to run the application
+
+Or you can copy the distribution files wherever you like. You can find them after calling distZip under
+./java-juicer/build/distributions/java-juicer-x.x.zip
 
 Please DON'T USE the ./gradlew run target, the application will start, but the relative paths to the native libraries
 will not be correct. Just use the distribution files.
 
 From time to time call
 git pull --recurse-submodules
-to get the latest changes and then rebuild the project with "./gradlew build".
+to get the latest changes and then rebuild the project with "./gradlew distZip".
 
 
 Eclipse IDE configuration
@@ -63,7 +66,7 @@ Native-Libraries dependencies and Java 9 modules (for javafx) in run configurati
 https://openjfx.io/openjfx-docs/#IDE-Eclipse
 
 Here is an example configuration for VM-Arguments of the Application configuration (Run->Run Configurations):
---add-modules javafx.base,javafx.controls,javafx.fxml,javafx.graphics --module-path /home/andreas/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-fxml/11.0.2/1b8a331d5f393b48de0aef59b3c967a312967290/javafx-fxml-11.0.2-linux.jar:/home/andreas/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-controls/11.0.2/5f6929050a744aab39ebfc1e8e5dd03bcd2ad47b/javafx-controls-11.0.2-linux.jar:/home/andreas/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-graphics/11.0.2/ef4c34f0ca77cd99100b76c2ccf1dce383572bb1/javafx-graphics-11.0.2-linux.jar:/home/andreas/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-base/11.0.2/8db178adb1085d455e5ef643a48c34959c8771c1/javafx-base-11.0.2-linux.jar -Djava.library.path=libdiscid-java-wrapper/native/build/linux/amd64
+--add-modules javafx.base,javafx.controls,javafx.fxml,javafx.graphics --module-path /home/andreas/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-fxml/11.0.2/1b8a331d5f393b48de0aef59b3c967a312967290/javafx-fxml-11.0.2-linux.jar:/home/andreas/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-controls/11.0.2/5f6929050a744aab39ebfc1e8e5dd03bcd2ad47b/javafx-controls-11.0.2-linux.jar:/home/andreas/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-graphics/11.0.2/ef4c34f0ca77cd99100b76c2ccf1dce383572bb1/javafx-graphics-11.0.2-linux.jar:/home/andreas/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-base/11.0.2/8db178adb1085d455e5ef643a48c34959c8771c1/javafx-base-11.0.2-linux.jar -Djava.library.path=../libdiscid-java-wrapper/native/build/linux/amd64
 
 Features
 ==========
@@ -73,7 +76,7 @@ Important features:
 - [ ] Fixed lame presets (with joint stereo) [Really needed? Just preset standard implemented. For classical music FLAC would probably better.
 - [x] Musicbrainz / CDDB retrieval of Artist name, Album name, Song name
 - [x] Artwork retrieval
-- [ ] Musicbrainz data submission (for CDs that are not yet listed)
+- [/] Musicbrainz data submission (for CDs that are not yet listed)
 - [ ] Debian package maintaining
 - [ ] For Archiving purposes Hash generation for each file and comparison (sha2)
 - [ ] For Archiving: Parallel generation of mp3 and flac
@@ -85,6 +88,7 @@ Important features:
 
 TODO / Backlog
 ------------------------
+- [ ] Bug: ConfigurationServiceTest overwrites the users config file. Why? I stubbed the file opening with Mockito.
 - [ ] Use the drive selection for ripping and musicbrainz retrieval currently it is not used.
 - [ ] Bug: Progress bar doesn't disappear after work is finished. No finish dialog. [Reproduction try to load a CD from musicbrainz, that is not listed there]
 - [x] Add support for Multi-CD releases. Ask the user to select the right CD.
@@ -103,21 +107,24 @@ TODO / Backlog
 - [x] Remove Jitpack.io from the build and directly integrate the submodules with git and gradle
 - [ ] Remove the CoverartArchive API dependency and implement the file download myself (java or wget?) 
 - [x] Read TOC and isrc for submission of discId to musicbrainz
-- [ ] Upload TOC and ISRC to musicbrainz for unknown releases
+- Musicbrainz data submission
+    - [x] Upload TOC and ISRC to musicbrainz for unknown releases (via http link).
+    - [ ] Extract the track names and other information from CD-TEXT info. For example with cdda-player -l from the libcdio package.
+    - [ ] Or enter the data manually and submit to musicbrainz.
 - [x] If there is only one disc for discid don't ask the user for input.
 - Ripping
-	- [ ] cdparanoia is extremely slow. Either make it faster by disabling paranoia mode or find an alternative to it.
+    - [ ] cdparanoia is extremely slow. Either make it faster by disabling paranoia mode or find an alternative to it.
 - Progress Bar
-	- [x] Show progress bar during cdparanoia ripping process
-	- [ ] Rip every track on it's own so an accurate progress bar can be shown.
-	- [x] Pimping the progress bar. Show the current work (converting track 1/15). I guess this also means to have a Task for each work?
+    - [x] Show progress bar during cdparanoia ripping process
+    - [ ] Rip every track on it's own so an accurate progress bar can be shown.
+    - [x] Pimping the progress bar. Show the current work (converting track 1/15). I guess this also means to have a Task for each work?
 - [ ] Logging for debug and info and error
 - [ ] Verbose mode with logging info
 - [x] The first release year must be searched by a special query and not via discid. Often the first release has been a vinyl/Schellack record
-	- [x] Now the CD title is used as a query.
-	- [ ] Add manual input of first release year.
-	- [ ] Currently not all releases for a CD title will be retrieved. See Gustav Holst - The Planets which doesn't find the 1981 first release for the record.
-	- [ ] Maybe use the Release Group from musicbrainz to get the first release year. But I don't know if the data quality is good enough. 
+    - [x] Now the CD title is used as a query.
+    - [ ] Add manual input of first release year.
+    - [ ] Currently not all releases for a CD title will be retrieved. See Gustav Holst - The Planets which doesn't find the 1981 first release for the record.
+    - [ ] Maybe use the Release Group from musicbrainz to get the first release year. But I don't know if the data quality is good enough. 
 - [ ] Blade Runner throws IndexOutOfBoundsException
 java.lang.IndexOutOfBoundsException: Index: 12, Size: 12
 	at java.util.ArrayList.rangeCheck(ArrayList.java:653)
