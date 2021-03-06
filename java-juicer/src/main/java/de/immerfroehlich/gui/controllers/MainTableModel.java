@@ -10,13 +10,17 @@ public class MainTableModel {
 	SimpleBooleanProperty pregap;
 	StringProperty artist;
 	StringProperty title;
+	StringProperty year;
+	StringProperty album;
 	
-	public MainTableModel(String track, boolean pregap, String artist, String title) {
+	public MainTableModel(String track, boolean pregap, String artist, String title, String year, String album) {
 		super();
 		this.track = new SimpleStringProperty(track);
 		this.pregap = new SimpleBooleanProperty(pregap);
 		this.artist = new SimpleStringProperty(artist);
 		this.title = new SimpleStringProperty(title);
+		this.year = new SimpleStringProperty(year);
+		this.album = new SimpleStringProperty(album);
 	}
 
 }

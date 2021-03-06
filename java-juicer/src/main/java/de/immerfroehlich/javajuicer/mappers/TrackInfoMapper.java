@@ -18,6 +18,7 @@ public class TrackInfoMapper {
     	boolean pregapAvailable = pregap != null;
     	if(pregapAvailable) {
     		if(pregap.position != 0) {
+    			//TODO: Add GUI info.
     			System.out.println("A pregap audible track other then position 00 is currently not supported by this application.");
     		}
     		System.out.println("=== This CD has a hidden \"first\" track that is most probably not listed on the cover.===");
@@ -25,11 +26,13 @@ public class TrackInfoMapper {
     		
     		boolean noArtistCredit = pregap.artistCredit.size() == 0;
     		if(noArtistCredit) {
+    			//TODO: Add GUI info.
     			System.out.println("The pregap does not have an artist-credit. Please correct that for the selected record in musicbrainz.org and try again.");
     			System.exit(0);
     		}
     		mp3Track.isPregap = true;
 			mp3Track.artist = pregap.artistCredit.get(0).name;
+			mp3Track.album = release.title;
 			mp3Track.releaseYear = release.date;
 			mp3Track.firstReleaseYear = releaseDate;
 			mp3Track.title = pregap.title;
@@ -39,6 +42,7 @@ public class TrackInfoMapper {
     	for(Track track : medium.tracks) {
 			TrackInfo mp3Track = new TrackInfo();
 			mp3Track.artist = release.artistCredit.get(0).name;
+			mp3Track.album = release.title;
 			mp3Track.releaseYear = release.date;
 			mp3Track.firstReleaseYear = releaseDate;
 			mp3Track.title = track.title;

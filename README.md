@@ -88,6 +88,8 @@ Important features:
 
 TODO / Backlog
 ------------------------
+- Mp3 Creation
+    - [x] Bug: The album title is currently not ID3 tagged. Instead track name is used.
 - [ ] Bug: ConfigurationServiceTest overwrites the users config file. Why? I stubbed the file opening with Mockito.
 - [ ] Use the drive selection for ripping and musicbrainz retrieval currently it is not used.
 - [ ] Bug: Progress bar doesn't disappear after work is finished. No finish dialog. [Reproduction try to load a CD from musicbrainz, that is not listed there]
@@ -98,7 +100,11 @@ TODO / Backlog
     - [x] Select the kind of release before ripping.
     - [ ] Selecting a naming scheme after adding a new leads to IndexOutOfBoundException is this a bug in JavaFX???
     - [ ] Create a modal dialog to add/edit/remove  naming schemes currently this is not very user friendly (and maybe just select the default one).
-- [ ] Track numbers will currently not be displayed correctly in the main view table - Fix it.
+- GUI
+    - [ ] Show a dialog for not supported pregap tracks.
+- Configuration
+    - [ ] Add a few common used default naming schemes.
+- [x] Track numbers will currently not be displayed correctly in the main view table - Fix it.
 - [x] Pregap track (inaudible) - don't convert it to mp3. Remove the wav (Example: Genesis - Selling England..., Vangelis - Blade Runner)
 - [x] Add support for hidden audible pregap tracks (Example: Die Ärzte - 13)
 - [x] Selection of cdrom device

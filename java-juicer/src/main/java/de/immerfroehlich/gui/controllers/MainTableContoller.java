@@ -70,7 +70,6 @@ public class MainTableContoller implements Initializable{
 	
 	private Release selectedYearRelease;
 	private Release selectedRelease;
-	private String releaseTitle;
 	private Medium medium;
 	private boolean manualCoverDialogCorrect;
 	private String selectedNamingScheme;
@@ -85,6 +84,8 @@ public class MainTableContoller implements Initializable{
 	@FXML private TableColumn<MainTableModel, Boolean> columnPregap;
 	@FXML private TableColumn<MainTableModel, String> columnArtist;
 	@FXML private TableColumn<MainTableModel, String> columnTitle;
+	@FXML private TableColumn<MainTableModel, String> columnYear;
+	@FXML private TableColumn<MainTableModel, String> columnAlbumTitle;
 	@FXML private VBox vboxImages;
 	@FXML private Label driveLabel;
 	@FXML private ChoiceBox<String> driveChoiceBox;
@@ -132,6 +133,8 @@ public class MainTableContoller implements Initializable{
 		columnPregap = (TableColumn<MainTableModel, Boolean>) tableView.getColumns().get(1);
 		columnArtist = (TableColumn<MainTableModel, String>) tableView.getColumns().get(2);
 		columnTitle = (TableColumn<MainTableModel, String>) tableView.getColumns().get(3);
+		columnYear = (TableColumn<MainTableModel, String>) tableView.getColumns().get(4);
+		columnAlbumTitle = (TableColumn<MainTableModel, String>) tableView.getColumns().get(5);
 		
 		columnTrack.setCellValueFactory( (cellDataFeature) -> {
 			return cellDataFeature.getValue().track;
@@ -147,6 +150,14 @@ public class MainTableContoller implements Initializable{
 		
 		columnTitle.setCellValueFactory( (cellDataFeature) -> {
 			return cellDataFeature.getValue().title;
+		});
+		
+		columnYear.setCellValueFactory( (cellDataFeature) -> {
+			return cellDataFeature.getValue().year;
+		});
+		
+		columnAlbumTitle.setCellValueFactory( (cellDataFeature) -> {
+			return cellDataFeature.getValue().album;
 		});
 		
 		this.progressBarDialog = new MasterDetailProgressBarDialog();

@@ -4,6 +4,7 @@ public class TrackInfo {
 	
 	public String artist = "";
 	public String title = "";
+	public String album = "";
 	public String firstReleaseYear = "";
 	public String releaseYear = "";
 	public boolean isPregap = false;

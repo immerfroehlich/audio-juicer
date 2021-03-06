@@ -41,5 +41,7 @@
 		<TableColumn fx:id="columnPregap" prefWidth="75.0" text="Pregap" />
 		<TableColumn fx:id="columnArtist" prefWidth="248.0" text="Artist" />
 		<TableColumn fx:id="columnTitle" prefWidth="265.0" text="Title" />
+      <TableColumn prefWidth="75.0" text="Year" />
+      <TableColumn prefWidth="75.0" text="Album" />
 	</columns>
 </TableView>

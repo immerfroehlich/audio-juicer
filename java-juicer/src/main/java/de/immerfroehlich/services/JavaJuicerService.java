@@ -83,7 +83,7 @@ public class JavaJuicerService {
 		command.addParameter("--ta");
 		command.addParameter(track.artist);
 		command.addParameter("--tl");
-		command.addParameter(track.title);
+		command.addParameter(track.album);
 		command.addParameter("--ty");
 		command.addParameter(track.firstReleaseYear);
 		command.addParameter("--tn");

@@ -16,7 +16,7 @@ public class ModelMapper {
 	public void map(List<TrackInfo> mp3Tracks) {
 		list.clear();
 		mp3Tracks.stream().forEach( (mp3Track) -> {
-			MainTableModel model = new MainTableModel("00", mp3Track.isPregap, mp3Track.artist, mp3Track.title);
+			MainTableModel model = new MainTableModel(mp3Track.trackNumber, mp3Track.isPregap, mp3Track.artist, mp3Track.title, mp3Track.firstReleaseYear, mp3Track.album);
 			list.add(model);
 		});
 	}
