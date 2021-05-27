@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import de.immerfroehlich.coverartarchive.CoverArtArchiveDownloader;
 import de.immerfroehlich.coverartarchive.CoverArtService;
@@ -30,6 +31,7 @@ import de.immerfroehlich.javajuicer.utils.FATCharRemover;
 import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Medium;
 import de.immerfroehlich.musicbrainz.model.Release;
+import de.immerfroehlich.musicbrainz.model.ReleaseGroup;
 import de.immerfroehlich.services.CdParanoiaService;
 import de.immerfroehlich.services.DeviceInfoService;
 import de.immerfroehlich.services.JavaJuicerService;
@@ -230,7 +232,7 @@ public class MainTableContoller implements Initializable{
 				selectedRelease = musicbrainzService.reloadRelease(selectedRelease);
 				//TODO Das erste Erscheinungsjahr lässt sich so nicht zuverlässig ermitteln! Wird bei Musicbrainz aber je Album angegeben.
 				//Ggf. das erste Erscheinungsjahr je Track ermitteln, z.B. bei Compilations
-				String releaseDate = promptForReleaseYear(selectedRelease.title, "Please select the first release date");
+				String releaseDate = promptForReleaseYear(selectedRelease, "Please select the first release date");
 				medium = promptForMedium(selectedRelease);
 				
 				String cdArtist = selectedRelease.artistCredit.get(0).name;
@@ -429,9 +431,20 @@ public class MainTableContoller implements Initializable{
 	}
 
 	
-	private String promptForReleaseYear(String releaseTitle, String text) {
+	private String promptForReleaseYear(Release selectedRelease, String text) {
+		
+		//Try to get the first release year from the release group first.
+		// ! This just works for single artist albums !
+		String artists = selectedRelease.artistCredit.stream().map(e -> e.name).collect(Collectors.joining(" "));
+		List<ReleaseGroup> releaseGroups = musicbrainzService.searchReleaseGroup(selectedRelease.title, artists);
+		releaseGroups = releaseGroups.stream().filter(e -> e.primaryType.equals("Album")).collect(Collectors.toList());
+		releaseGroups = releaseGroups.stream().filter(e -> e.title.equalsIgnoreCase(selectedRelease.title)).collect(Collectors.toList());
+		if(releaseGroups.size() > 0 && releaseGroups.size() < 2) {
+			return releaseGroups.get(0).firstReleaseDate;
+		}
+		
 		//TODO Maybe there is another way to get the data. Musicbrainz has the so called Release Groups.
-		List<Release> releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
+		List<Release> releases = musicbrainzService.searchReleasesByTitle(selectedRelease.title);
 		
 		FXUtils.runAndWait(() -> {
 			URL fxmlUrl = getClass().getResource("releaseSelectionDialog.fxml");

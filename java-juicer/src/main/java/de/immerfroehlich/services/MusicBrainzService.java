@@ -8,6 +8,7 @@ import java.util.Optional;
 import de.immerfroehlich.musicbrainz.MusicbrainzWs2Service;
 import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Release;
+import de.immerfroehlich.musicbrainz.model.ReleaseGroup;
 
 public class MusicBrainzService {
 	
@@ -20,6 +21,11 @@ public class MusicBrainzService {
 	public List<Release> searchReleasesByTitle(String title) {
 		MusicbrainzWs2Service service = new MusicbrainzWs2Service();
 		return service.searchReleasesByTitle(title);
+	}
+	
+	public List<ReleaseGroup> searchReleaseGroup(String title, String artist) {
+		MusicbrainzWs2Service service = new MusicbrainzWs2Service();
+		return service.searchReleaseGroup(artist, title);
 	}
 	
 	public Release reloadRelease(Release release) {

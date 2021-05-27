@@ -16,6 +16,8 @@ import org.glassfish.jersey.logging.LoggingFeature;
 
 import de.immerfroehlich.musicbrainz.model.Disc;
 import de.immerfroehlich.musicbrainz.model.Release;
+import de.immerfroehlich.musicbrainz.model.ReleaseGroup;
+import de.immerfroehlich.musicbrainz.model.ReleaseGroupList;
 
 public class MusicbrainzWs2Service {
 	
@@ -96,6 +98,21 @@ public class MusicbrainzWs2Service {
 		}
 		
 		return releases;
+	}
+	
+	public List<ReleaseGroup> searchReleaseGroup(String artist, String title) {
+		String urlEncTitle = urlEncode(title);
+		String urlEncArtist = urlEncode(artist);
+		String url = BASE_URL + "release-group";
+		String query = "release:\"" + title + "\" AND artistname:\"" + artist + "\"";
+		//https://musicbrainz.org/ws/2/release-group/?query=artistname:Metallica%20AND%20release:...%20and%20justice%20for%20all&fmt=json
+		WebTarget target = client.target(url)
+				.queryParam("fmt", "json")
+				.queryParam("query", query);
+		
+		ReleaseGroupList groups = target.request().get(ReleaseGroupList.class);
+		
+		return groups.releaseGroups;
 	}
 	
 	private String urlEncode(String text) {

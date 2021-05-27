@@ -91,7 +91,7 @@ TODO / Backlog
 - Mp3 Creation
     - [x] Bug: The album title is currently not ID3 tagged. Instead track name is used.
 - [ ] Bug: ConfigurationServiceTest overwrites the users config file. Why? I stubbed the file opening with Mockito.
-- [ ] Use the drive selection for ripping and musicbrainz retrieval currently it is not used.
+- [ ] Use the drive selection for ripping and musicbrainz retrieval. Currently it is not used.
 - [ ] Bug: Progress bar doesn't disappear after work is finished. No finish dialog. [Reproduction try to load a CD from musicbrainz, that is not listed there]
 - [x] Add support for Multi-CD releases. Ask the user to select the right CD.
 	- [ ] Automate the selection of the right CD in multi CD releases (if possible).
@@ -124,13 +124,15 @@ TODO / Backlog
     - [x] Show progress bar during cdparanoia ripping process
     - [ ] Rip every track on it's own so an accurate progress bar can be shown.
     - [x] Pimping the progress bar. Show the current work (converting track 1/15). I guess this also means to have a Task for each work?
+    - [ ] Make the progressbar visibly more understandable, currently it is not clear what the total progress is.
 - [ ] Logging for debug and info and error
 - [ ] Verbose mode with logging info
-- [x] The first release year must be searched by a special query and not via discid. Often the first release has been a vinyl/Schellack record
+- [x] Release year/date retrieval (never ending story)
+    - [x] Albums now get the release date from the release-group
     - [x] Now the CD title is used as a query.
-    - [ ] Add manual input of first release year.
+    - [ ] Add manual input of first release year, for release with no release-group, and preinput this with release date.
     - [ ] Currently not all releases for a CD title will be retrieved. See Gustav Holst - The Planets which doesn't find the 1981 first release for the record.
-    - [ ] Maybe use the Release Group from musicbrainz to get the first release year. But I don't know if the data quality is good enough. 
+    - [ ] For Compilations use the release date of the record (this goes to far!?!)
 - [ ] Blade Runner throws IndexOutOfBoundsException
 java.lang.IndexOutOfBoundsException: Index: 12, Size: 12
 	at java.util.ArrayList.rangeCheck(ArrayList.java:653)
@@ -148,7 +150,9 @@ Seems to be a pregap track
 - [ ] Get away from the questions tirade for missing artwork and implement it the GUI way - which means graphically show that no artwork was found.
 	And add a button to manually select artwork.
 - [ ] ?Show an info dialog on first start explaining that this is a frontend to Musicbrainz for ripping. And if any data is not OK, go to musicbrainz and correct it.
-- [x] Bug: The dialogs are missing action description that is given in command line. 
+- [x] Bug: The dialogs are missing action description that is given in command line.
+- [ ] Usability: Sometimes the download of the artwork / images is so slow, that it seems the application may be crashed. It would be better to just download the 500px versions of the artwork.
+        Also maybe it is a good idea to delete the images after the mp3 creation (not shure about this one)?
 
 
 Known Issues:
