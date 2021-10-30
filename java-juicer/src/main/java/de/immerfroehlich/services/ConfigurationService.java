@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.immerfroehlich.gui.modules.settings.ObservableNamingScheme;
 import de.immerfroehlich.javajuicer.model.Configuration;
+import de.immerfroehlich.javajuicer.model.ReleaseType;
 import de.immerfroehlich.javajuicer.model.config.ConfigModel;
 import de.immerfroehlich.javajuicer.model.config.Naming;
 import javafx.beans.property.SimpleStringProperty;
@@ -57,9 +58,27 @@ public class ConfigurationService {
 		ConfigModel config = new ConfigModel();
 		config.rootPath = home + File.separator + "Musik" + File.separator + "Archiv";
 		config.drivePath = "/dev/sr0";
-		String name = "Single Artist Album (Pop)";
-		String pattern = "/%a/%l</CD%c>/%n %t";
+		
+		//Naming and ReleaseType need to be linked and in the user config the user needs to select the type for a naming scheme.
+		
+		String name = ReleaseType.SingleArtistAlbumOrSingle.getString();
+		String pattern = "/Single Artist/%a/%l</CD%c>/%n %t";
 		Naming naming = new Naming(name, pattern);
+		config.namings.add(naming);
+		
+		name = ReleaseType.InterpretedMusic.getString();
+		pattern = "/Interpreted Music/%a/%l</CD%c>/%n %t";
+		naming = new Naming(name, pattern);
+		config.namings.add(naming);
+		
+		name = ReleaseType.Compilation.getString();
+		pattern = "/Compilations/%l</CD%c>/%n %r - %t";
+		naming = new Naming(name, pattern);
+		config.namings.add(naming);
+		
+		name = ReleaseType.Audio.getString();
+		pattern = "/Audio/%a/%l</CD%c>/%n %t";
+		naming = new Naming(name, pattern);
 		config.namings.add(naming);
 		
 		return config;		

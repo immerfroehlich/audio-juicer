@@ -78,7 +78,7 @@ Important features:
 - [x] Artwork retrieval
 - [/] Musicbrainz data submission (for CDs that are not yet listed)
 - [ ] Debian package maintaining
-- [ ] For Archiving purposes Hash generation for each file and comparison (sha2)
+- [x] For Archiving purposes Hash generation for each file and comparison (sha2)
 - [ ] For Archiving: Parallel generation of mp3 and flac
 - [x] GUI (JavaFX or Swing)
 - [ ] User presets (just enter the command line) [??? Is this really needed? Or just stick to the standard presets that lame offers]
@@ -88,6 +88,7 @@ Important features:
 
 TODO / Backlog
 ------------------------
+- [ ] Hash generation is currently not working, take StdOut and write it to file.
 - Mp3 Creation
     - [x] Bug: The album title is currently not ID3 tagged. Instead track name is used.
 - [ ] Bug: ConfigurationServiceTest overwrites the users config file. Why? I stubbed the file opening with Mockito.
@@ -102,8 +103,11 @@ TODO / Backlog
     - [ ] Create a modal dialog to add/edit/remove  naming schemes currently this is not very user friendly (and maybe just select the default one).
 - GUI
     - [ ] Show a dialog for not supported pregap tracks.
+    - [ ] If a CD is listed only once on musicbrainz, has the same DiscID/TOC but is part of another release, the workflow is baffling the user.
+          Ask first, if this is the right release or if it is a different release, that has to be created on musicbrainz and then create TOC-Add-Link
 - Configuration
-    - [ ] Add a few common used default naming schemes.
+    - [ ] BUG and FEATURE: Naming and ReleaseType need to be linked and in the user config the user needs to select the type for a naming scheme.
+    - [x] Add a few common used default naming schemes.
 - [x] Track numbers will currently not be displayed correctly in the main view table - Fix it.
 - [x] Pregap track (inaudible) - don't convert it to mp3. Remove the wav (Example: Genesis - Selling England..., Vangelis - Blade Runner)
 - [x] Add support for hidden audible pregap tracks (Example: Die Ärzte - 13)
@@ -153,6 +157,7 @@ Seems to be a pregap track
 - [x] Bug: The dialogs are missing action description that is given in command line.
 - [ ] Usability: Sometimes the download of the artwork / images is so slow, that it seems the application may be crashed. It would be better to just download the 500px versions of the artwork.
         Also maybe it is a good idea to delete the images after the mp3 creation (not shure about this one)?
+- [x] Option to include all artists into filename and artist info.
 
 
 Known Issues:

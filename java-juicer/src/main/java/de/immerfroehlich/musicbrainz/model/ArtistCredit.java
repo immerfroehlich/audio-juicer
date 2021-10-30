@@ -6,5 +6,5 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class ArtistCredit {
 	
 	public String name = "";
-
+	public String joinphrase = "";
 }

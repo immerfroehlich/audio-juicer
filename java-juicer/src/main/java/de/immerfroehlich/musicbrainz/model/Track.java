@@ -13,4 +13,7 @@ public class Track {
 	public int position;
 	public String title = "";
 	public List<ArtistCredit> artistCredit = new ArrayList<>();
+	
+	@JsonIgnoreProperties
+	public String firstReleaseDate;
 }

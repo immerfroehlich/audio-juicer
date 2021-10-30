@@ -85,7 +85,7 @@ public class JavaJuicerService {
 		command.addParameter("--tl");
 		command.addParameter(track.album);
 		command.addParameter("--ty");
-		command.addParameter(track.firstReleaseYear);
+		command.addParameter(track.firstReleaseDate);
 		command.addParameter("--tn");
 		command.addParameter(track.trackNumber);
 		

@@ -5,7 +5,7 @@ public class TrackInfo {
 	public String artist = "";
 	public String title = "";
 	public String album = "";
-	public String firstReleaseYear = "";
+	public String firstReleaseDate = "";
 	public String releaseYear = "";
 	public boolean isPregap = false;
 	public Cover cover = new Cover();
@@ -13,7 +13,7 @@ public class TrackInfo {
 	
 	@Override
 	public String toString() {
-		return artist + " - " + title + " - " + "(" + firstReleaseYear + ")";
+		return artist + " - " + title + " - " + "(" + firstReleaseDate + ")";
 	}
 
 }
