@@ -77,7 +77,7 @@ public class ConfigurationService {
 		config.namings.add(naming);
 		
 		name = ReleaseType.Audio.getString();
-		pattern = "/Audio/%a/%l</CD%c>/%n %t";
+		pattern = "/Audio/%l (%a)</CD%c>/%n %t";
 		naming = new Naming(name, pattern);
 		config.namings.add(naming);
 		

@@ -129,6 +129,7 @@ TODO / Backlog
     - [ ] Rip every track on it's own so an accurate progress bar can be shown.
     - [x] Pimping the progress bar. Show the current work (converting track 1/15). I guess this also means to have a Task for each work?
     - [ ] Make the progressbar visibly more understandable, currently it is not clear what the total progress is.
+    - [ ] The total number of tasks is displayed wrong after the last task has been finished. It shows 5 instead of 4.
 - [ ] Logging for debug and info and error
 - [ ] Verbose mode with logging info
 - [x] Release year/date retrieval (never ending story)
@@ -158,6 +159,8 @@ Seems to be a pregap track
 - [ ] Usability: Sometimes the download of the artwork / images is so slow, that it seems the application may be crashed. It would be better to just download the 500px versions of the artwork.
         Also maybe it is a good idea to delete the images after the mp3 creation (not shure about this one)?
 - [x] Option to include all artists into filename and artist info.
+- [ ] After selecting the "include all artists" option remap all album info.
+- [ ] Reload main table and naming scheme example after checking "include all artists" .Create a method for album mapping and afterwards reload main table and naming scheme example. Call it after include all artists.
 
 
 Known Issues:
