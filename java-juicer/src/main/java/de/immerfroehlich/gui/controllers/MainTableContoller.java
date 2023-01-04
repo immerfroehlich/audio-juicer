@@ -220,22 +220,15 @@ public class MainTableContoller implements Initializable{
 				System.out.println("Calculated DiscId is: " + discid);
 				Optional<Disc> discOpt = musicbrainzService.lookupDiscById(discid);
 				List<Release> releases;
-				if(discOpt.isEmpty()) {
+				if(discOpt.isEmpty() || discOpt.get().releases.size() == 0) { //Why is this even possible to have a disc without releases? Might be a data problem. Look at test/ressources/cd_without_release.json
 					String toc = libDiscIdService.getDiscToc(selectedDrive).get();
 					String tocAddLink = musicbrainzService.createTocAddLink(discid, toc);
 					showTocDialog(tocAddLink);
 					//releases = musicbrainzService.searchReleasesByTitle(releaseTitle);
 					return new ArrayList<>();
 				}
-				else {
-					releases = discOpt.get().releases;
-				}
 				
-				boolean noReleasesFound = releases.size() == 0; 
-				if(noReleasesFound) {
-					showNoReleaseFoundDialog();
-					return new ArrayList<>();
-				}
+				releases = discOpt.get().releases;
 				
 				selectedRelease = promptForRelease(releases, "Please select the right release");
 				selectedRelease = musicbrainzService.reloadRelease(selectedRelease);
@@ -546,16 +539,6 @@ public class MainTableContoller implements Initializable{
 		return selectedRelease;
 	}
 
-	private void showNoReleaseFoundDialog() {
-		FXUtils.runAndWait(()->{
-			String text = "No Release was found for this CD.\n"
-					+ "Please login to musicbrainz.org and add your CD/release.\n"
-					+ "Afterwards you could start this program again.";
-			InfoAlert alert = new InfoAlert(text);
-			alert.showAndWait();
-		});
-	}
-	
 	private void showTocDialog(final String toc) {
 		FXUtils.runAndWait(()->{
 			String text = 

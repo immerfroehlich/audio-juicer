@@ -219,6 +219,9 @@ Feature Overview:
 ABCDE - Uses musicbrainz ws1 service which is out of support, currently not working
 Sound Juicer is not working under Ubuntu for years now (which is why I started this project)
 
+Some of the old ones are not working anymore because freedb stopped service. But it can be replaced with gnudb.org:
+https://www.heise.de/news/CD-Datenbanken-freedb-ist-tot-es-leben-die-Alternativen-4792544.html
+
 
 Development Knowledge Ressources
 =================================
@@ -236,6 +239,9 @@ lame --preset standard sample.wav sample.mp3
 
 ImageMagick (Front cover resizing):
 convert -resize 300x300 front.jpg front_small.jpg
+
+cd-info (not used yet, just an idea, doesn't show track lenghts, maybe I find a better information source):
+cd-info --no-device-info --no-cddb
 
 
 Ideas on using and installing Audio Juicer in Windows
