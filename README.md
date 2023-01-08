@@ -88,7 +88,7 @@ Important features:
 
 TODO / Backlog
 ------------------------
-- [ ] Hash generation is currently not working, take StdOut and write it to file.
+- [x] Hash generation is currently not working, take StdOut and write it to file.
 - Mp3 Creation
     - [x] Bug: The album title is currently not ID3 tagged. Instead track name is used.
 - [ ] Bug: ConfigurationServiceTest overwrites the users config file. Why? I stubbed the file opening with Mockito.
@@ -133,11 +133,13 @@ TODO / Backlog
 - [ ] Logging for debug and info and error
 - [ ] Verbose mode with logging info
 - [x] Release year/date retrieval (never ending story)
+    - [x] [-For Compilations-] use the release date of the record (Currently this is always used)
+    - [ ] Understand (ask) how the logic behind the records release date is in Musicbrainz. There is a logic. Seems like it is bound to the first date on the release group.
     - [x] Albums now get the release date from the release-group
     - [x] Now the CD title is used as a query.
     - [ ] Add manual input of first release year, for release with no release-group, and preinput this with release date.
+          [Maybe try to get all information automatically and let the user fill in the missing things in the main table.?]
     - [ ] Currently not all releases for a CD title will be retrieved. See Gustav Holst - The Planets which doesn't find the 1981 first release for the record.
-    - [ ] For Compilations use the release date of the record (this goes to far!?!)
 - [ ] Blade Runner throws IndexOutOfBoundsException
 java.lang.IndexOutOfBoundsException: Index: 12, Size: 12
 	at java.util.ArrayList.rangeCheck(ArrayList.java:653)
